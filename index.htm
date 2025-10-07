@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>웹 메트로놈 (엇박 지원)</title>
+  <style>
+    :root{--bg:#0b0f14;--card:#111826;--text:#e6edf3;--muted:#9aa7b4;--acc:#5eead4;--danger:#f87171}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(160deg,#0b0f14,#0e1726 50%,#0b0f14);color:var(--text);display:flex;align-items:center;justify-content:center}
+    .wrap{width:min(920px,92vw);padding:24px}
+    .card{background:rgba(17,24,38,.8);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.35);padding:24px}
+    h1{font-size:clamp(20px,3.2vw,28px);margin:0 0 6px}
+    p.sub{margin:0 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+    .panel{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px}
+    .row{display:flex;align-items:center;gap:12px;margin:12px 0}
+    label{min-width:92px;color:var(--muted)}
+    input[type="range"]{width:100%}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    button{appearance:none;border:none;border-radius:14px;padding:12px 16px;font-weight:700;color:#0b0f14;background:var(--acc);cursor:pointer;transition:.15s transform ease,.2s opacity ease}
+    button:hover{transform:translateY(-1px)}
+    button.secondary{background:#334155;color:#e5e7eb}
+    button.danger{background:var(--danger);color:#fff}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1220;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px}
+    .tog{display:flex;align-items:center;gap:10px}
+    .tog input{width:18px;height:18px}
+    .meter{height:10px;border-radius:8px;background:#0b1220;overflow:hidden;border:1px solid rgba(255,255,255,.07)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#34d399,#a7f3d0);transition:width .08s ease}
+    .info{color:var(--muted);font-size:14px}
+    .hint{font-size:12px;color:#94a3b8}
+    @media (max-width:740px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>웹 메트로놈 <span class="hint">/ 엇박 지원 · WebAudio</span></h1>
+      <p class="sub">BPM, 볼륨 조절과 함께 엇박(앤드, &amp;)을 자동 재생하거나, 버튼으로 즉시 엇박음을 낼 수 있어요.</p>
+
+      <div class="grid">
+        <!-- Controls -->
+        <div class="panel">
+          <div class="row"><label for="bpm">BPM</label><input id="bpm" type="range" min="30" max="240" value="100"><span id="bpmVal" class="kbd">100</span></div>
+          <div class="row"><label for="beats">박자(분자)</label><input id="beats" type="range" min="1" max="12" value="4"><span id="beatsVal" class="kbd">4</span></div>
+          <div class="row"><label for="vol">볼륨</label><input id="vol" type="range" min="0" max="1" step="0.01" value="0.7"><span id="volVal" class="kbd">0.70</span></div>
+          <div class="row tog"><input id="offbeatToggle" type="checkbox" checked><label for="offbeatToggle">엇박(앤드) 자동 재생</label></div>
+          <div class="row tog"><input id="accent1" type="checkbox" checked><label for="accent1">1박 강세</label></div>
+          <div class="btns">
+            <button id="startBtn">Start</button>
+            <button id="stopBtn" class="secondary">Stop</button>
+            <button id="tapBtn" class="secondary">Tap Tempo</button>
+            <button id="hitOffbeatBtn" title="지금 '&'(앤드) 소리 내기">즉시 엇박</button>
+            <button id="countInBtn" class="secondary" title="4박 카운트인 후 시작">Count‑in</button>
+            <button id="panicBtn" class="danger" title="모든 사운드 즉시 정지">Panic</button>
+          </div>
+          <div class="row" style="margin-top:16px"><label>진행</label><div class="meter" style="flex:1"><div id="bar" class="bar"></div></div><span id="beatNow" class="kbd">–</span></div>
+          <div class="info">단축키: <span class="kbd">Space</span> 시작/정지 · <span class="kbd">O</span> 즉시 엇박</div>
+        </div>
+
+        <!-- Help -->
+        <div class="panel">
+          <h3 style="margin:0 0 10px">사용 팁</h3>
+          <ul style="line-height:1.7;margin:0 0 6px 18px">
+            <li><b>Tap Tempo</b>를 3~5회 눌러 원하는 BPM을 빠르게 맞출 수 있어요.</li>
+            <li><b>엇박 자동</b>을 켜면 각 박 사이의 정확한 1/2 지점에 '&amp;'가 울려요.</li>
+            <li><b>즉시 엇박</b>은 연습 중 필요한 순간에만 '&amp;'를 추가로 치고 싶을 때 사용하세요.</li>
+            <li><b>Count‑in</b>은 4박 카운트 후 본 연주를 시작합니다.</li>
+          </ul>
+          <p class="hint">⚠️ 모바일/브라우저 보안 정책 때문에 <b>Start</b> 같은 사용자 동작 후에만 소리가 납니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Web Audio Setup =====
+    let ctx, masterGain;
+    function ensureAudio() {
+      if (ctx) return;
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = ctx.createGain();
+      masterGain.gain.value = parseFloat(vol.value);
+      masterGain.connect(ctx.destination);
+    }
+
+    function clickSound(time, {accent=false}={}){
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      const dur = 0.03;
+      // Accent: higher pitch and louder
+      const f = accent ? 1760 : 1320; // A6 / E6-ish
+      osc.frequency.setValueAtTime(f, time);
+      g.gain.setValueAtTime(accent ? 0.8 : 0.6, time);
+      g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(time); osc.stop(time + 0.06);
+    }
+
+    function offbeatSound(time){
+      // Slightly different timbre: noise + short blip
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      const dur = 0.035;
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, time); // A5
+      g.gain.setValueAtTime(0.55, time);
+      g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(time); osc.stop(time + 0.07);
+    }
+
+    // ===== Scheduler =====
+    const lookahead = 25; // ms
+    const scheduleAheadTime = 0.15; // s
+    let isRunning = false, nextNoteTime = 0, currentBeat = 0, tapTimes = [];
+
+    function nextNote(){
+      const secondsPerBeat = 60.0 / parseFloat(bpm.value);
+      nextNoteTime += secondsPerBeat; // move to next beat
+      currentBeat = (currentBeat + 1) % parseInt(beats.value,10);
+    }
+
+    function schedule(){
+      while (isRunning && nextNoteTime < ctx.currentTime + scheduleAheadTime){
+        // main beat
+        clickSound(nextNoteTime, {accent: accent1.checked && currentBeat===0});
+        // offbeat halfway between beats
+        if(offbeatToggle.checked){
+          const half = 60.0 / parseFloat(bpm.value) / 2;
+          offbeatSound(nextNoteTime + half);
+        }
+        // progress UI
+        queueBeatUI(nextNoteTime, currentBeat);
+        nextNote();
+      }
+      timerID = setTimeout(schedule, lookahead);
+    }
+
+    let timerID = null;
+    function start(countIn=false){
+      ensureAudio();
+      if (ctx.state === 'suspended') ctx.resume();
+      if (isRunning) return;
+      isRunning = true;
+      currentBeat = parseInt(beats.value,10) - 1; // so first scheduled becomes beat 0
+      const now = ctx.currentTime + 0.05;
+      if(countIn){
+        // 4 beat count-in
+        let t = now;
+        for(let i=0;i<4;i++){
+          clickSound(t, {accent: i===0});
+          t += 60.0 / parseFloat(bpm.value);
+        }
+        nextNoteTime = t;
+      } else {
+        nextNoteTime = now;
+      }
+      schedule();
+    }
+
+    function stop(){
+      isRunning = false;
+      clearTimeout(timerID);
+      beatNow.textContent = '–';
+      bar.style.width = '0%';
+    }
+
+    function panic(){
+      stop();
+      if(ctx){ ctx.close(); ctx = null; masterGain = null; }
+    }
+
+    function hitOffbeatNow(){
+      ensureAudio();
+      if (ctx.state === 'suspended') ctx.resume();
+      offbeatSound(ctx.currentTime + 0.001);
+    }
+
+    // ===== UI =====
+    const bpm = document.getElementById('bpm');
+    const bpmVal = document.getElementById('bpmVal');
+    const beats = document.getElementById('beats');
+    const beatsVal = document.getElementById('beatsVal');
+    const vol = document.getElementById('vol');
+    const volVal = document.getElementById('volVal');
+    const offbeatToggle = document.getElementById('offbeatToggle');
+    const accent1 = document.getElementById('accent1');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const hitOffbeatBtn = document.getElementById('hitOffbeatBtn');
+    const tapBtn = document.getElementById('tapBtn');
+    const countInBtn = document.getElementById('countInBtn');
+    const panicBtn = document.getElementById('panicBtn');
+    const bar = document.getElementById('bar');
+    const beatNow = document.getElementById('beatNow');
+
+    bpm.addEventListener('input', ()=> bpmVal.textContent = bpm.value);
+    beats.addEventListener('input', ()=> beatsVal.textContent = beats.value);
+    vol.addEventListener('input', ()=> {
+      volVal.textContent = (+vol.value).toFixed(2);
+      ensureAudio();
+      masterGain.gain.setTargetAtTime(parseFloat(vol.value), ctx.currentTime, 0.005);
+    });
+
+    startBtn.addEventListener('click', ()=> start(false));
+    countInBtn.addEventListener('click', ()=> start(true));
+    stopBtn.addEventListener('click', stop);
+    hitOffbeatBtn.addEventListener('click', hitOffbeatNow);
+    panicBtn.addEventListener('click', panic);
+
+    // Tap tempo
+    tapBtn.addEventListener('click', ()=>{
+      const t = performance.now();
+      tapTimes.push(t);
+      if (tapTimes.length > 6) tapTimes.shift();
+      if (tapTimes.length >= 2){
+        let sum=0, cnt=0;
+        for(let i=1;i<tapTimes.length;i++){ sum += (tapTimes[i]-tapTimes[i-1]); cnt++; }
+        const avgMs = sum / cnt;
+        const newBpm = Math.max(30, Math.min(240, Math.round(60000/avgMs)));
+        bpm.value = newBpm; bpmVal.textContent = newBpm;
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e)=>{
+      if(e.code === 'Space'){ e.preventDefault(); isRunning ? stop() : start(false); }
+      if(e.key.toLowerCase() === 'o'){ hitOffbeatNow(); }
+    });
+
+    // Simple progress/beat UI synced to scheduler
+    function queueBeatUI(time, beatIdx){
+      const delay = Math.max(0, (time - ctx.currentTime) * 1000);
+      setTimeout(()=>{
+        beatNow.textContent = (beatIdx+1);
+        const pct = ((beatIdx+1)/parseInt(beats.value,10))*100;
+        bar.style.width = pct + '%';
+        if (pct >= 99) setTimeout(()=> bar.style.width = '0%', 60);
+      }, delay);
+    }
+  </script>
+</body>
+</html>
