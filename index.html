@@ -32,7 +32,7 @@
       color:var(--text);
       display:block;
       padding:20px 10px;
-      /* iOS 더블탭 확대 방지 */
+      /* iOS 더블탭 확대 방지(기본 제스처를 클릭으로) */
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
@@ -108,24 +108,24 @@
           <div class="inline-help">ショートカット：<span class="kbd">Space</span> 再生/停止・<span class="kbd">O</span> 即時・裏拍</div>
         </section>
 
- <!-- 右：ガイド -->
-<aside class="panel">
-  <h2 class="sec-title">
-    <button id="toggleGuide" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:700;">
-      使い方のコツ <span class="chip">はじめてでも安心</span>
-      <span id="arrow" style="margin-left:auto;">▼</span>
-    </button>
-  </h2>
-  <div id="guideContent" style="display:none;">
-    <ul style="line-height:1.78;margin:0 0 6px 18px">
-      <li><b>タップテンポ</b>を3〜5回押すと、平均からBPMを自動計算して設定します。</li>
-      <li><b>裏拍の自動</b>がオンのとき、各拍のちょうど半分の位置で「＆」が鳴ります。</li>
-      <li><b>即時・裏拍</b>は練習中の欲しい瞬間だけ「＆」を加えたいときに便利です。</li>
-      <li><b>1拍目の強調</b>をオンにすると、1拍目だけ高めの音・やや大きめで鳴ります。</li>
-    </ul>
-    <p class="inline-help">※ ブラウザーの仕様により、<b>最初はボタン操作後のみ音が鳴ります</b>。</p>
-  </div>
-</aside>
+        <!-- 右：ガイド (접기/펼치기) -->
+        <aside class="panel">
+          <h2 class="sec-title">
+            <button id="toggleGuide" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:700;">
+              使い方のコツ <span class="chip">はじめてでも安心</span>
+              <span id="arrow" style="margin-left:auto;">▼</span>
+            </button>
+          </h2>
+          <div id="guideContent" style="display:none;">
+            <ul style="line-height:1.78;margin:0 0 6px 18px">
+              <li><b>タップテンポ</b>を3〜5回押すと、平均からBPMを自動計算して設定します。</li>
+              <li><b>裏拍の自動</b>がオンのとき、各拍のちょうど半分の位置で「＆」が鳴ります。</li>
+              <li><b>即時・裏拍</b>は練習中の欲しい瞬間だけ「＆」を加えたいときに便利です。</li>
+              <li><b>1拍目の強調</b>をオンにすると、1拍目だけ高めの音・やや大きめで鳴ります。</li>
+            </ul>
+            <p class="inline-help">※ ブラウザーの仕様により、<b>最初はボタン操作後のみ音が鳴ります</b>。</p>
+          </div>
+        </aside>
       </div>
     </div>
   </div>
@@ -254,7 +254,7 @@
     const bar = document.getElementById('bar');
     const beatNow = document.getElementById('beatNow');
 
-    // 双方向バインド（スライダーと数値）
+    // 슬라이더 ↔ 숫자 입력 바인딩
     function bindRangeAndNum(rangeEl, numEl, min, max, step=1){
       const clamp = v => Math.min(max, Math.max(min, Number(v)));
       rangeEl.addEventListener('input', ()=>{ numEl.value = rangeEl.value; });
@@ -265,7 +265,7 @@
     bindRangeAndNum(beats, beatsNum, 1, 12, 1);
     bindRangeAndNum(vol, volNum, 0, 1, 0.01);
 
-    // 音量は即反映
+    // 볼륨 즉시 반영
     function updateVolume(){
       ensureAudio();
       masterGain.gain.setTargetAtTime(Number(vol.value), ctx.currentTime, 0.005);
@@ -274,7 +274,7 @@
     vol.addEventListener('input', updateVolume);
     volNum.addEventListener('input', ()=>{ vol.value = volNum.value; updateVolume(); });
 
-    // 再生トグル
+    // 재생 토글
     function setPlayButton(isPlaying){
       if (isPlaying){
         playToggle.textContent = '■ ストップ';
@@ -289,7 +289,7 @@
     panicBtn.addEventListener('click', panic);
     hitOffbeatBtn.addEventListener('click', hitOffbeatNow);
 
-    // タップテンポ
+    // 탭 템포
     tapBtn.addEventListener('click', ()=>{
       const t = performance.now();
       tapTimes.push(t);
@@ -303,13 +303,13 @@
       }
     });
 
-    // キーボード
+    // 키보드
     document.addEventListener('keydown', (e)=>{
       if(e.code === 'Space'){ e.preventDefault(); running ? stop() : start(false); }
       if(e.key.toLowerCase() === 'o'){ hitOffbeatNow(); }
     });
 
-    // 進行UI
+    // 진행 UI
     function queueBeatUI(time, idx){
       const delay = Math.max(0, (time - ctx.currentTime) * 1000);
       setTimeout(()=>{
@@ -319,30 +319,20 @@
         if (pct >= 99) setTimeout(()=> bar.style.width = '0%', 60);
       }, delay);
     }
-        (function(){
-      const container = document.querySelector('.btns');
-      if(!container) return;
-      let lastTouch = 0;
-      container.addEventListener('touchend', function(e){
-        const now = Date.now();
-        if(now - lastTouch < 300){ e.preventDefault(); }
-        lastTouch = now;
-      }, {passive:false});
-    })();
-    // 「使い方のコツ」 접기/펼치기
-const toggleGuide = document.getElementById('toggleGuide');
-const guideContent = document.getElementById('guideContent');
-const arrow = document.getElementById('arrow');
 
-toggleGuide.addEventListener('click', ()=>{
-  if(guideContent.style.display === "none"){
-    guideContent.style.display = "block";
-    arrow.textContent = "▲";
-  } else {
-    guideContent.style.display = "none";
-    arrow.textContent = "▼";
-  }
-});
+    // 「使い方のコツ」 접기/펼치기
+    const toggleGuide = document.getElementById('toggleGuide');
+    const guideContent = document.getElementById('guideContent');
+    const arrow = document.getElementById('arrow');
+    toggleGuide.addEventListener('click', ()=>{
+      if(guideContent.style.display === "none"){
+        guideContent.style.display = "block";
+        arrow.textContent = "▲";
+      } else {
+        guideContent.style.display = "none";
+        arrow.textContent = "▼";
+      }
+    });
   </script>
 </body>
 </html>
