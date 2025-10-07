@@ -1,84 +1,189 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>웹 메트로놈 (엇박 지원)</title>
+  <title>ウェブ・メトロノーム（裏拍対応）</title>
   <style>
-    :root{--bg:#0b0f14;--card:#111826;--text:#e6edf3;--muted:#9aa7b4;--acc:#5eead4;--danger:#f87171}
+    /* ===== 明るい配色 ===== */
+    :root{
+      --bg:#f7fbff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --line:#e5eaf1;
+      --primary:#2563eb;   /* スタート */
+      --secondary:#64748b; /* サブ */
+      --accent:#22c55e;    /* 進行バー/強拍 */
+      --accent2:#0ea5e9;   /* 進行バー */
+      --danger:#ef4444;    /* パニック */
+      --kbd-bg:#eef2ff;
+      --kbd-bd:#c7d2fe;
+      --chip:#e9f7ff;
+    }
+
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(160deg,#0b0f14,#0e1726 50%,#0b0f14);color:var(--text);display:flex;align-items:center;justify-content:center}
-    .wrap{width:min(920px,92vw);padding:24px}
-    .card{background:rgba(17,24,38,.8);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.35);padding:24px}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:linear-gradient(160deg,#f7fbff,#ffffff 40%,#f3f8ff);
+      color:var(--text);
+      display:flex;align-items:center;justify-content:center
+    }
+
+    .wrap{width:min(980px,94vw);padding:22px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(15,23,42,.08);
+      padding:22px
+    }
+
     h1{font-size:clamp(20px,3.2vw,28px);margin:0 0 6px}
-    p.sub{margin:0 0 18px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
-    .panel{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px}
+    p.sub{margin:0 0 16px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+    @media (max-width:760px){.grid{grid-template-columns:1fr}}
+
+    .panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px
+    }
+
+    /* 行・入力 */
     .row{display:flex;align-items:center;gap:12px;margin:12px 0}
-    label{min-width:92px;color:var(--muted)}
+    .row.nowrap{flex-wrap:wrap}
+    label{min-width:120px;color:var(--muted)}
     input[type="range"]{width:100%}
-    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    button{appearance:none;border:none;border-radius:14px;padding:12px 16px;font-weight:700;color:#0b0f14;background:var(--acc);cursor:pointer;transition:.15s transform ease,.2s opacity ease}
-    button:hover{transform:translateY(-1px)}
-    button.secondary{background:#334155;color:#e5e7eb}
-    button.danger{background:var(--danger);color:#fff}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1220;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px}
+    input[type="number"]{
+      width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:8px
+    }
+    .inline-help{font-size:12px;color:#64748b}
+
+    /* キー表示 */
+    .kbd{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      background:var(--kbd-bg);
+      border:1px solid var(--kbd-bd);
+      padding:5px 7px;border-radius:8px
+    }
+
+    /* トグル等 */
     .tog{display:flex;align-items:center;gap:10px}
     .tog input{width:18px;height:18px}
-    .meter{height:10px;border-radius:8px;background:#0b1220;overflow:hidden;border:1px solid rgba(255,255,255,.07)}
-    .bar{height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#34d399,#a7f3d0);transition:width .08s ease}
-    .info{color:var(--muted);font-size:14px}
-    .hint{font-size:12px;color:#94a3b8}
-    @media (max-width:740px){.grid{grid-template-columns:1fr}}
+
+    /* 進行バー */
+    .meter{height:12px;border-radius:8px;background:#eef2f7;overflow:hidden;border:1px solid var(--line)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),#34d399,#86efac);transition:width .08s ease}
+
+    /* ボタン */
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    button{
+      appearance:none;border:1px solid transparent;
+      border-radius:12px;padding:10px 14px;font-weight:700;
+      cursor:pointer;transition:.15s transform ease,.15s background ease
+    }
+    button:hover{transform:translateY(-1px)}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-secondary{background:#e9edf3;color:#0f172a;border-color:#dbe2ea}
+    .btn-ghost{background:#f4f8ff;color:#0f172a;border-color:#dbe2ea}
+    .btn-danger{background:var(--danger);color:#fff}
+
+    /* セクション見出し */
+    .sec-title{display:flex;align-items:center;gap:8px;margin:2px 0 8px}
+    .chip{font-size:12px;padding:4px 8px;border-radius:999px;background:var(--chip);color:#0369a1;border:1px solid #cdefff}
+
+    /* アクセシビリティ */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>웹 메트로놈 <span class="hint">/ 엇박 지원 · WebAudio</span></h1>
-      <p class="sub">BPM, 볼륨 조절과 함께 엇박(앤드, &amp;)을 자동 재생하거나, 버튼으로 즉시 엇박음을 낼 수 있어요.</p>
+      <h1>ウェブ・メトロノーム <span class="chip">裏拍対応・WebAudio</span></h1>
+      <p class="sub">
+        再生（スタート）すると、設定した <b>BPM</b> と <b>拍子</b> でクリック音を鳴らします。  
+        <b>裏拍（＆）</b> は自動再生のオン／オフのほか、ボタンで即時に鳴らすこともできます。
+      </p>
 
       <div class="grid">
-        <!-- Controls -->
-        <div class="panel">
-          <div class="row"><label for="bpm">BPM</label><input id="bpm" type="range" min="30" max="240" value="100"><span id="bpmVal" class="kbd">100</span></div>
-          <div class="row"><label for="beats">박자(분자)</label><input id="beats" type="range" min="1" max="12" value="4"><span id="beatsVal" class="kbd">4</span></div>
-          <div class="row"><label for="vol">볼륨</label><input id="vol" type="range" min="0" max="1" step="0.01" value="0.7"><span id="volVal" class="kbd">0.70</span></div>
-          <div class="row tog"><input id="offbeatToggle" type="checkbox" checked><label for="offbeatToggle">엇박(앤드) 자동 재생</label></div>
-          <div class="row tog"><input id="accent1" type="checkbox" checked><label for="accent1">1박 강세</label></div>
-          <div class="btns">
-            <button id="startBtn">Start</button>
-            <button id="stopBtn" class="secondary">Stop</button>
-            <button id="tapBtn" class="secondary">Tap Tempo</button>
-            <button id="hitOffbeatBtn" title="지금 '&'(앤드) 소리 내기">즉시 엇박</button>
-            <button id="countInBtn" class="secondary" title="4박 카운트인 후 시작">Count‑in</button>
-            <button id="panicBtn" class="danger" title="모든 사운드 즉시 정지">Panic</button>
-          </div>
-          <div class="row" style="margin-top:16px"><label>진행</label><div class="meter" style="flex:1"><div id="bar" class="bar"></div></div><span id="beatNow" class="kbd">–</span></div>
-          <div class="info">단축키: <span class="kbd">Space</span> 시작/정지 · <span class="kbd">O</span> 즉시 엇박</div>
-        </div>
+        <!-- 左：操作 -->
+        <section class="panel" aria-labelledby="controlsTitle">
+          <h2 id="controlsTitle" class="sec-title">
+            基本操作 <span class="chip">素早く調整</span>
+          </h2>
 
-        <!-- Help -->
-        <div class="panel">
-          <h3 style="margin:0 0 10px">사용 팁</h3>
-          <ul style="line-height:1.7;margin:0 0 6px 18px">
-            <li><b>Tap Tempo</b>를 3~5회 눌러 원하는 BPM을 빠르게 맞출 수 있어요.</li>
-            <li><b>엇박 자동</b>을 켜면 각 박 사이의 정확한 1/2 지점에 '&amp;'가 울려요.</li>
-            <li><b>즉시 엇박</b>은 연습 중 필요한 순간에만 '&amp;'를 추가로 치고 싶을 때 사용하세요.</li>
-            <li><b>Count‑in</b>은 4박 카운트 후 본 연주를 시작합니다.</li>
+          <!-- テンポ -->
+          <div class="row nowrap">
+            <label for="bpm">テンポ（BPM）</label>
+            <input id="bpm" type="range" min="30" max="240" value="100" aria-describedby="bpmHelp">
+            <input id="bpmNum" type="number" min="30" max="240" value="100" />
+            <span id="bpmHelp" class="inline-help">タップでも合わせられます</span>
+          </div>
+
+          <!-- 拍子 -->
+          <div class="row nowrap">
+            <label for="beats">拍子（分子）</label>
+            <input id="beats" type="range" min="1" max="12" value="4">
+            <input id="beatsNum" type="number" min="1" max="12" value="4" />
+          </div>
+
+          <!-- 音量 -->
+          <div class="row nowrap">
+            <label for="vol">音量</label>
+            <input id="vol" type="range" min="0" max="1" step="0.01" value="0.70">
+            <input id="volNum" type="number" min="0" max="1" step="0.01" value="0.70" />
+          </div>
+
+          <!-- オプション -->
+          <div class="row tog"><input id="offbeatToggle" type="checkbox" checked><label for="offbeatToggle">裏拍（＆）を自動で鳴らす</label></div>
+          <div class="row tog"><input id="accent1" type="checkbox" checked><label for="accent1">1拍目を強調（高く・少し大きく）</label></div>
+
+          <!-- ボタン：整理済み -->
+          <div class="btns" role="group" aria-label="再生コントロール">
+            <button id="playToggle" class="btn-primary" title="スペースキーでも開始/停止できます">▶ スタート</button>
+            <button id="countInBtn" class="btn-secondary" title="4拍カウント後に再生開始">カウントイン</button>
+            <button id="tapBtn" class="btn-ghost" title="テンポを3〜5回タップしてBPMを合わせます">タップテンポ</button>
+            <button id="hitOffbeatBtn" class="btn-ghost" title="今すぐ裏拍（＆）だけ鳴らす">即時・裏拍</button>
+            <button id="panicBtn" class="btn-danger" title="すべての音を即時停止">パニック</button>
+          </div>
+
+          <!-- 進行バー -->
+          <div class="row" style="margin-top:10px">
+            <label>進行</label>
+            <div class="meter" style="flex:1"><div id="bar" class="bar"></div></div>
+            <span id="beatNow" class="kbd" aria-live="polite">–</span>
+          </div>
+
+          <div class="inline-help">
+            ショートカット：<span class="kbd">Space</span> 再生/停止・
+            <span class="kbd">O</span> 即時・裏拍
+          </div>
+        </section>
+
+        <!-- 右：ガイド -->
+        <aside class="panel" aria-labelledby="guideTitle">
+          <h2 id="guideTitle" class="sec-title">使い方のコツ <span class="chip">はじめてでも安心</span></h2>
+          <ul style="line-height:1.78;margin:0 0 6px 18px">
+            <li><b>タップテンポ</b>を3〜5回押すと、平均からBPMを自動計算して設定します。</li>
+            <li><b>裏拍の自動</b>がオンのとき、各拍のちょうど半分の位置で「＆」が鳴ります。</li>
+            <li><b>即時・裏拍</b>は練習中の欲しい瞬間だけ「＆」を加えたいときに便利です。</li>
+            <li><b>1拍目の強調</b>をオンにすると、1拍目だけ高めの音・やや大きめで鳴ります。</li>
           </ul>
-          <p class="hint">⚠️ 모바일/브라우저 보안 정책 때문에 <b>Start</b> 같은 사용자 동작 후에만 소리가 납니다.</p>
-        </div>
+          <p class="inline-help">※ ブラウザーの仕様により、<b>最初はボタン操作後のみ音が鳴ります</b>。</p>
+        </aside>
       </div>
     </div>
   </div>
 
   <script>
-    // ===== Web Audio Setup =====
+    /* ===== Web Audio 準備 ===== */
     let ctx, masterGain;
-    function ensureAudio() {
-      if (ctx) return;
+    function ensureAudio(){
+      if(ctx) return;
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       masterGain = ctx.createGain();
       masterGain.gain.value = parseFloat(vol.value);
@@ -89,82 +194,82 @@
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
       const dur = 0.03;
-      // Accent: higher pitch and louder
-      const f = accent ? 1760 : 1320; // A6 / E6-ish
+      osc.type = 'sine';
+      const f = accent ? 1760 : 1320;   // 強拍は少し高く
       osc.frequency.setValueAtTime(f, time);
-      g.gain.setValueAtTime(accent ? 0.8 : 0.6, time);
+      g.gain.setValueAtTime(accent ? 0.85 : 0.6, time);
       g.gain.exponentialRampToValueAtTime(0.001, time + dur);
       osc.connect(g); g.connect(masterGain);
       osc.start(time); osc.stop(time + 0.06);
     }
 
     function offbeatSound(time){
-      // Slightly different timbre: noise + short blip
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
       const dur = 0.035;
       osc.type = 'square';
-      osc.frequency.setValueAtTime(880, time); // A5
+      osc.frequency.setValueAtTime(880, time);
       g.gain.setValueAtTime(0.55, time);
       g.gain.exponentialRampToValueAtTime(0.001, time + dur);
       osc.connect(g); g.connect(masterGain);
       osc.start(time); osc.stop(time + 0.07);
     }
 
-    // ===== Scheduler =====
-    const lookahead = 25; // ms
-    const scheduleAheadTime = 0.15; // s
-    let isRunning = false, nextNoteTime = 0, currentBeat = 0, tapTimes = [];
+    /* ===== スケジューラ ===== */
+    const lookahead = 25;          // ms
+    const scheduleAheadTime = 0.15;// s
+    let running = false, nextNoteTime = 0, beatIdx = 0, tapTimes = [];
+    let timerID = null;
 
     function nextNote(){
-      const secondsPerBeat = 60.0 / parseFloat(bpm.value);
-      nextNoteTime += secondsPerBeat; // move to next beat
-      currentBeat = (currentBeat + 1) % parseInt(beats.value,10);
+      const secondsPerBeat = 60 / Number(bpm.value);
+      nextNoteTime += secondsPerBeat;
+      beatIdx = (beatIdx + 1) % Number(beats.value);
     }
 
     function schedule(){
-      while (isRunning && nextNoteTime < ctx.currentTime + scheduleAheadTime){
-        // main beat
-        clickSound(nextNoteTime, {accent: accent1.checked && currentBeat===0});
-        // offbeat halfway between beats
-        if(offbeatToggle.checked){
-          const half = 60.0 / parseFloat(bpm.value) / 2;
+      while (running && nextNoteTime < ctx.currentTime + scheduleAheadTime){
+        // 拍
+        clickSound(nextNoteTime, {accent: accent1.checked && beatIdx === 0});
+        // 裏拍
+        if (offbeatToggle.checked){
+          const half = (60 / Number(bpm.value)) / 2;
           offbeatSound(nextNoteTime + half);
         }
-        // progress UI
-        queueBeatUI(nextNoteTime, currentBeat);
+        queueBeatUI(nextNoteTime, beatIdx);
         nextNote();
       }
       timerID = setTimeout(schedule, lookahead);
     }
 
-    let timerID = null;
-    function start(countIn=false){
+    function start(afterCountIn=false){
       ensureAudio();
       if (ctx.state === 'suspended') ctx.resume();
-      if (isRunning) return;
-      isRunning = true;
-      currentBeat = parseInt(beats.value,10) - 1; // so first scheduled becomes beat 0
+      if (running) return;
+      running = true;
+      beatIdx = Number(beats.value) - 1;
       const now = ctx.currentTime + 0.05;
-      if(countIn){
-        // 4 beat count-in
+
+      if (afterCountIn){
         let t = now;
         for(let i=0;i<4;i++){
           clickSound(t, {accent: i===0});
-          t += 60.0 / parseFloat(bpm.value);
+          t += 60 / Number(bpm.value);
         }
         nextNoteTime = t;
-      } else {
+      }else{
         nextNoteTime = now;
       }
       schedule();
+      setPlayButton(true);
     }
 
     function stop(){
-      isRunning = false;
+      running = false;
       clearTimeout(timerID);
       beatNow.textContent = '–';
       bar.style.width = '0%';
+      setPlayButton(false);
     }
 
     function panic(){
@@ -178,64 +283,87 @@
       offbeatSound(ctx.currentTime + 0.001);
     }
 
-    // ===== UI =====
+    /* ===== UI 紐付け ===== */
     const bpm = document.getElementById('bpm');
-    const bpmVal = document.getElementById('bpmVal');
+    const bpmNum = document.getElementById('bpmNum');
     const beats = document.getElementById('beats');
-    const beatsVal = document.getElementById('beatsVal');
+    const beatsNum = document.getElementById('beatsNum');
     const vol = document.getElementById('vol');
-    const volVal = document.getElementById('volVal');
+    const volNum = document.getElementById('volNum');
+
     const offbeatToggle = document.getElementById('offbeatToggle');
     const accent1 = document.getElementById('accent1');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const hitOffbeatBtn = document.getElementById('hitOffbeatBtn');
+
+    const playToggle = document.getElementById('playToggle');
     const tapBtn = document.getElementById('tapBtn');
     const countInBtn = document.getElementById('countInBtn');
     const panicBtn = document.getElementById('panicBtn');
+    const hitOffbeatBtn = document.getElementById('hitOffbeatBtn');
+
     const bar = document.getElementById('bar');
     const beatNow = document.getElementById('beatNow');
 
-    bpm.addEventListener('input', ()=> bpmVal.textContent = bpm.value);
-    beats.addEventListener('input', ()=> beatsVal.textContent = beats.value);
-    vol.addEventListener('input', ()=> {
-      volVal.textContent = (+vol.value).toFixed(2);
+    // 双方向バインド（スライダーと数値）
+    function bindRangeAndNum(rangeEl, numEl, min, max, step=1){
+      const clamp = v => Math.min(max, Math.max(min, Number(v)));
+      rangeEl.addEventListener('input', ()=>{ numEl.value = rangeEl.value; });
+      numEl.addEventListener('input', ()=>{ numEl.value = clamp(numEl.value); rangeEl.value = numEl.value; });
+      if (step) numEl.step = step;
+    }
+    bindRangeAndNum(bpm, bpmNum, 30, 240, 1);
+    bindRangeAndNum(beats, beatsNum, 1, 12, 1);
+    bindRangeAndNum(vol, volNum, 0, 1, 0.01);
+
+    // 音量は即反映
+    function updateVolume(){
       ensureAudio();
-      masterGain.gain.setTargetAtTime(parseFloat(vol.value), ctx.currentTime, 0.005);
-    });
+      masterGain.gain.setTargetAtTime(Number(vol.value), ctx.currentTime, 0.005);
+      volNum.value = vol.value;
+    }
+    vol.addEventListener('input', updateVolume);
+    volNum.addEventListener('input', ()=>{ vol.value = volNum.value; updateVolume(); });
 
-    startBtn.addEventListener('click', ()=> start(false));
-    countInBtn.addEventListener('click', ()=> start(true));
-    stopBtn.addEventListener('click', stop);
-    hitOffbeatBtn.addEventListener('click', hitOffbeatNow);
+    // 再生トグル
+    function setPlayButton(isPlaying){
+      if (isPlaying){
+        playToggle.textContent = '■ ストップ';
+        playToggle.className = 'btn-primary';
+      }else{
+        playToggle.textContent = '▶ スタート';
+        playToggle.className = 'btn-primary';
+      }
+    }
+    playToggle.addEventListener('click', ()=> running ? stop() : start(false));
+    countInBtn.addEventListener('click', ()=> running ? null : start(true));
     panicBtn.addEventListener('click', panic);
+    hitOffbeatBtn.addEventListener('click', hitOffbeatNow);
 
-    // Tap tempo
+    // タップテンポ
     tapBtn.addEventListener('click', ()=>{
       const t = performance.now();
       tapTimes.push(t);
       if (tapTimes.length > 6) tapTimes.shift();
       if (tapTimes.length >= 2){
-        let sum=0, cnt=0;
-        for(let i=1;i<tapTimes.length;i++){ sum += (tapTimes[i]-tapTimes[i-1]); cnt++; }
-        const avgMs = sum / cnt;
+        let sum=0;
+        for(let i=1;i<tapTimes.length;i++) sum += (tapTimes[i]-tapTimes[i-1]);
+        const avgMs = sum / (tapTimes.length-1);
         const newBpm = Math.max(30, Math.min(240, Math.round(60000/avgMs)));
-        bpm.value = newBpm; bpmVal.textContent = newBpm;
+        bpm.value = bpmNum.value = newBpm;
       }
     });
 
-    // Keyboard shortcuts
+    // キーボード
     document.addEventListener('keydown', (e)=>{
-      if(e.code === 'Space'){ e.preventDefault(); isRunning ? stop() : start(false); }
+      if(e.code === 'Space'){ e.preventDefault(); running ? stop() : start(false); }
       if(e.key.toLowerCase() === 'o'){ hitOffbeatNow(); }
     });
 
-    // Simple progress/beat UI synced to scheduler
-    function queueBeatUI(time, beatIdx){
+    // 進行UI
+    function queueBeatUI(time, idx){
       const delay = Math.max(0, (time - ctx.currentTime) * 1000);
       setTimeout(()=>{
-        beatNow.textContent = (beatIdx+1);
-        const pct = ((beatIdx+1)/parseInt(beats.value,10))*100;
+        beatNow.textContent = (idx+1);
+        const pct = ((idx+1)/Number(beats.value))*100;
         bar.style.width = pct + '%';
         if (pct >= 99) setTimeout(()=> bar.style.width = '0%', 60);
       }, delay);
