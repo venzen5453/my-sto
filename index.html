@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 확대 방지 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>ウェブ・メトロノーム（裏拍対応）</title>
   <style>
     /* ===== 明るい配色 ===== */
@@ -16,34 +17,31 @@
       --secondary:#64748b; /* サブ */
       --accent:#22c55e;    /* 進行バー/強拍 */
       --accent2:#0ea5e9;   /* 進行バー */
-      --danger:#ef4444;    /* パニック */
+      --danger:#ef4444;    /* 即時停止 */
       --kbd-bg:#eef2ff;
       --kbd-bd:#c7d2fe;
       --chip:#e9f7ff;
     }
 
     *{box-sizing:border-box}
-      html,body{
-      height:auto;        /* 자동 높이 */
-      min-height:100%;    /* 최소 100% */
-    }
+    html,body{height:auto;min-height:100%}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       background:linear-gradient(160deg,#f7fbff,#ffffff 40%,#f3f8ff);
       color:var(--text);
-
-      display:block;      /* flex → block */
-      padding:20px 10px;  /* 위/아래 여백 */
+      display:block;
+      padding:20px 10px;
+      /* iOS 더블탭 확대 방지 */
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
-    .wrap{
-      width:min(980px,94vw);
-      margin:0 auto;      /* 중앙 정렬 */
-      padding:22px;
+    button,input,select,textarea{
+      font-size:16px; /* iOS 자동 확대 방지 */
+      touch-action: manipulation;
     }
 
-
-    .wrap{width:min(980px,94vw);padding:22px}
+    .wrap{width:min(980px,94vw);margin:0 auto;padding:22px}
     .card{
       background:var(--card);
       border:1px solid var(--line);
@@ -57,57 +55,27 @@
     .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
     @media (max-width:760px){.grid{grid-template-columns:1fr}}
 
-    .panel{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:16px
-    }
-
-    /* 行・入力 */
+    .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
     .row{display:flex;align-items:center;gap:12px;margin:12px 0}
     .row.nowrap{flex-wrap:wrap}
     label{min-width:120px;color:var(--muted)}
     input[type="range"]{width:100%}
-    input[type="number"]{
-      width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:8px
-    }
+    input[type="number"]{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
     .inline-help{font-size:12px;color:#64748b}
-
-    /* キー表示 */
-    .kbd{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-      background:var(--kbd-bg);
-      border:1px solid var(--kbd-bd);
-      padding:5px 7px;border-radius:8px
-    }
-
-    /* トグル等 */
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--kbd-bg);border:1px solid var(--kbd-bd);padding:5px 7px;border-radius:8px}
     .tog{display:flex;align-items:center;gap:10px}
     .tog input{width:18px;height:18px}
-
-    /* 進行バー */
     .meter{height:12px;border-radius:8px;background:#eef2f7;overflow:hidden;border:1px solid var(--line)}
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),#34d399,#86efac);transition:width .08s ease}
-
-    /* ボタン */
     .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    button{
-      appearance:none;border:1px solid transparent;
-      border-radius:12px;padding:10px 14px;font-weight:700;
-      cursor:pointer;transition:.15s transform ease,.15s background ease
-    }
+    button{appearance:none;border:1px solid transparent;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:.15s transform ease,.15s background ease}
     button:hover{transform:translateY(-1px)}
     .btn-primary{background:var(--primary);color:#fff}
     .btn-secondary{background:#e9edf3;color:#0f172a;border-color:#dbe2ea}
     .btn-ghost{background:#f4f8ff;color:#0f172a;border-color:#dbe2ea}
     .btn-danger{background:var(--danger);color:#fff}
-
-    /* セクション見出し */
     .sec-title{display:flex;align-items:center;gap:8px;margin:2px 0 8px}
     .chip{font-size:12px;padding:4px 8px;border-radius:999px;background:var(--chip);color:#0369a1;border:1px solid #cdefff}
-
-    /* アクセシビリティ */
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
@@ -122,70 +90,42 @@
 
       <div class="grid">
         <!-- 左：操作 -->
-        <section class="panel" aria-labelledby="controlsTitle">
-          <h2 id="controlsTitle" class="sec-title">
-            基本操作 <span class="chip">素早く調整</span>
-          </h2>
-
-          <!-- テンポ -->
-          <div class="row nowrap">
-            <label for="bpm">テンポ（BPM）</label>
-            <input id="bpm" type="range" min="30" max="240" value="100" aria-describedby="bpmHelp">
-            <input id="bpmNum" type="number" min="30" max="240" value="100" />
-            <span id="bpmHelp" class="inline-help">タップでも合わせられます</span>
-          </div>
-
-          <!-- 拍子 -->
-          <div class="row nowrap">
-            <label for="beats">拍子（分子）</label>
-            <input id="beats" type="range" min="1" max="12" value="4">
-            <input id="beatsNum" type="number" min="1" max="12" value="4" />
-          </div>
-
-          <!-- 音量 -->
-          <div class="row nowrap">
-            <label for="vol">音量</label>
-            <input id="vol" type="range" min="0" max="1" step="0.01" value="0.70">
-            <input id="volNum" type="number" min="0" max="1" step="0.01" value="0.70" />
-          </div>
-
-          <!-- オプション -->
+        <section class="panel">
+          <h2 class="sec-title">基本操作 <span class="chip">素早く調整</span></h2>
+          <div class="row nowrap"><label for="bpm">テンポ（BPM）</label><input id="bpm" type="range" min="30" max="240" value="100"><input id="bpmNum" type="number" min="30" max="240" value="100" /><span class="inline-help">タップでも合わせられます</span></div>
+          <div class="row nowrap"><label for="beats">拍子（分子）</label><input id="beats" type="range" min="1" max="12" value="4"><input id="beatsNum" type="number" min="1" max="12" value="4" /></div>
+          <div class="row nowrap"><label for="vol">音量</label><input id="vol" type="range" min="0" max="1" step="0.01" value="0.70"><input id="volNum" type="number" min="0" max="1" step="0.01" value="0.70" /></div>
           <div class="row tog"><input id="offbeatToggle" type="checkbox" checked><label for="offbeatToggle">裏拍（＆）を自動で鳴らす</label></div>
           <div class="row tog"><input id="accent1" type="checkbox" checked><label for="accent1">1拍目を強調（高く・少し大きく）</label></div>
-
-          <!-- ボタン：整理済み -->
-          <div class="btns" role="group" aria-label="再生コントロール">
-            <button id="playToggle" class="btn-primary" title="スペースキーでも開始/停止できます">▶ スタート</button>
-            <button id="countInBtn" class="btn-secondary" title="4拍カウント後に再生開始">カウントイン</button>
-            <button id="tapBtn" class="btn-ghost" title="テンポを3〜5回タップしてBPMを合わせます">タップテンポ</button>
-            <button id="hitOffbeatBtn" class="btn-ghost" title="今すぐ裏拍（＆）だけ鳴らす">即時・裏拍</button>
-            <button id="panicBtn" class="btn-danger" title="すべての音を即時停止">即時停止</button>
+          <div class="btns">
+            <button id="playToggle" class="btn-primary">▶ スタート</button>
+            <button id="countInBtn" class="btn-secondary">カウントイン</button>
+            <button id="tapBtn" class="btn-ghost">タップテンポ</button>
+            <button id="hitOffbeatBtn" class="btn-ghost">即時・裏拍</button>
+            <button id="panicBtn" class="btn-danger">即時停止</button>
           </div>
-
-          <!-- 進行バー -->
-          <div class="row" style="margin-top:10px">
-            <label>進行</label>
-            <div class="meter" style="flex:1"><div id="bar" class="bar"></div></div>
-            <span id="beatNow" class="kbd" aria-live="polite">–</span>
-          </div>
-
-          <div class="inline-help">
-            ショートカット：<span class="kbd">Space</span> 再生/停止・
-            <span class="kbd">O</span> 即時・裏拍
-          </div>
+          <div class="row" style="margin-top:10px"><label>進行</label><div class="meter" style="flex:1"><div id="bar" class="bar"></div></div><span id="beatNow" class="kbd">–</span></div>
+          <div class="inline-help">ショートカット：<span class="kbd">Space</span> 再生/停止・<span class="kbd">O</span> 即時・裏拍</div>
         </section>
 
-        <!-- 右：ガイド -->
-        <aside class="panel" aria-labelledby="guideTitle">
-          <h2 id="guideTitle" class="sec-title">使い方のコツ <span class="chip">はじめてでも安心</span></h2>
-          <ul style="line-height:1.78;margin:0 0 6px 18px">
-            <li><b>タップテンポ</b>を3〜5回押すと、平均からBPMを自動計算して設定します。</li>
-            <li><b>裏拍の自動</b>がオンのとき、各拍のちょうど半分の位置で「＆」が鳴ります。</li>
-            <li><b>即時・裏拍</b>は練習中の欲しい瞬間だけ「＆」を加えたいときに便利です。</li>
-            <li><b>1拍目の強調</b>をオンにすると、1拍目だけ高めの音・やや大きめで鳴ります。</li>
-          </ul>
-          <p class="inline-help">※ ブラウザーの仕様により、<b>最初はボタン操作後のみ音が鳴ります</b>。</p>
-        </aside>
+ <!-- 右：ガイド -->
+<aside class="panel">
+  <h2 class="sec-title">
+    <button id="toggleGuide" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:700;">
+      使い方のコツ <span class="chip">はじめてでも安心</span>
+      <span id="arrow" style="margin-left:auto;">▼</span>
+    </button>
+  </h2>
+  <div id="guideContent" style="display:none;">
+    <ul style="line-height:1.78;margin:0 0 6px 18px">
+      <li><b>タップテンポ</b>を3〜5回押すと、平均からBPMを自動計算して設定します。</li>
+      <li><b>裏拍の自動</b>がオンのとき、各拍のちょうど半分の位置で「＆」が鳴ります。</li>
+      <li><b>即時・裏拍</b>は練習中の欲しい瞬間だけ「＆」を加えたいときに便利です。</li>
+      <li><b>1拍目の強調</b>をオンにすると、1拍目だけ高めの音・やや大きめで鳴ります。</li>
+    </ul>
+    <p class="inline-help">※ ブラウザーの仕様により、<b>最初はボタン操作後のみ音が鳴ります</b>。</p>
+  </div>
+</aside>
       </div>
     </div>
   </div>
@@ -379,6 +319,30 @@
         if (pct >= 99) setTimeout(()=> bar.style.width = '0%', 60);
       }, delay);
     }
+        (function(){
+      const container = document.querySelector('.btns');
+      if(!container) return;
+      let lastTouch = 0;
+      container.addEventListener('touchend', function(e){
+        const now = Date.now();
+        if(now - lastTouch < 300){ e.preventDefault(); }
+        lastTouch = now;
+      }, {passive:false});
+    })();
+    // 「使い方のコツ」 접기/펼치기
+const toggleGuide = document.getElementById('toggleGuide');
+const guideContent = document.getElementById('guideContent');
+const arrow = document.getElementById('arrow');
+
+toggleGuide.addEventListener('click', ()=>{
+  if(guideContent.style.display === "none"){
+    guideContent.style.display = "block";
+    arrow.textContent = "▲";
+  } else {
+    guideContent.style.display = "none";
+    arrow.textContent = "▼";
+  }
+});
   </script>
 </body>
 </html>
