@@ -23,14 +23,25 @@
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
+      html,body{
+      height:auto;        /* 자동 높이 */
+      min-height:100%;    /* 최소 100% */
+    }
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       background:linear-gradient(160deg,#f7fbff,#ffffff 40%,#f3f8ff);
       color:var(--text);
-      display:flex;align-items:center;justify-content:center
+
+      display:block;      /* flex → block */
+      padding:20px 10px;  /* 위/아래 여백 */
     }
+    .wrap{
+      width:min(980px,94vw);
+      margin:0 auto;      /* 중앙 정렬 */
+      padding:22px;
+    }
+
 
     .wrap{width:min(980px,94vw);padding:22px}
     .card{
@@ -148,7 +159,7 @@
             <button id="countInBtn" class="btn-secondary" title="4拍カウント後に再生開始">カウントイン</button>
             <button id="tapBtn" class="btn-ghost" title="テンポを3〜5回タップしてBPMを合わせます">タップテンポ</button>
             <button id="hitOffbeatBtn" class="btn-ghost" title="今すぐ裏拍（＆）だけ鳴らす">即時・裏拍</button>
-            <button id="panicBtn" class="btn-danger" title="すべての音を即時停止">パニック</button>
+            <button id="panicBtn" class="btn-danger" title="すべての音を即時停止">即時停止</button>
           </div>
 
           <!-- 進行バー -->
