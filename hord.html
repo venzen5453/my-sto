@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>One‑Minute Chord Changes｜1分コードチェンジ計測</title>
+  <style>
+    :root{
+      --bg:#f7fbff; --card:#ffffff; --text:#0f172a; --muted:#475569; --line:#e5eaf1;
+      --primary:#2563eb; --danger:#ef4444; --ok:#16a34a; --chip:#e9f7ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(160deg,#f7fbff,#ffffff 40%,#f3f8ff);color:var(--text);padding:20px}
+    .wrap{max-width:960px;margin:0 auto}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(15,23,42,.08);padding:22px}
+    h1{margin:0 0 6px}
+    .sub{margin:0 0 16px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:820px){.grid{grid-template-columns:1fr}}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+    .row{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+    label{min-width:120px;color:var(--muted)}
+    select,input[type="number"]{padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+    button{appearance:none;border:1px solid #dbe2ea;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;background:#eef3fb}
+    button.primary{background:var(--primary);color:#fff;border-color:#1d4ed8}
+    button.danger{background:var(--danger);color:#fff;border-color:#b91c1c}
+    .chip{font-size:12px;padding:4px 8px;border-radius:999px;background:var(--chip);color:#0369a1;border:1px solid #cdefff}
+    .center{display:flex;align-items:center;justify-content:center}
+    .big{font-size:56px;font-weight:900}
+    .mid{font-size:28px;font-weight:800}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef2ff;border:1px solid #c7d2fe;padding:4px 7px;border-radius:8px}
+    .meter{height:14px;border-radius:999px;background:#eef2f7;overflow:hidden;border:1px solid var(--line)}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#60a5fa,#34d399,#86efac)}
+    .pair{display:flex;gap:8px;align-items:center;justify-content:center}
+    .pair .code{font-size:44px;font-weight:900;padding:10px 14px;border:1px solid var(--line);border-radius:14px;min-width:90px;text-align:center;background:#fff}
+    .result{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+    .box{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+    .muted{color:#64748b}
+    .right{display:flex;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>One‑Minute Chord Changes <span class="chip">1分コードチェンジ計測</span></h1>
+      <p class="sub">ギター初心者〜中級者の定番練習。1分間で <b>何回</b> コードを切り替えられるかをカウントして記録します。スペースキーでカウント、Enterで次のペアに進みます。</p>
+
+      <div class="grid">
+        <!-- 左：設定・計測 -->
+        <section class="panel">
+          <h2>設定</h2>
+          <div class="row">
+            <label>プリセット</label>
+            <select id="preset">
+              <option value="EZ">EZ: C–G / G–D / D–A / A–E / Em–Am</option>
+              <option value="OPEN">Open: C–Am / Am–G / G–Em / Em–D / D–C</option>
+              <option value="POP">Pop: C–G / Am–F / G–Em / D–A / F–C</option>
+              <option value="CUSTOM">Custom（下で指定）</option>
+            </select>
+          </div>
+          <div class="row">
+            <label>Customペア</label>
+            <input id="customPairs" type="text" placeholder="例: C-G, D-A, Em-Am" style="flex:1;min-width:220px;padding:8px 10px;border:1px solid var(--line);border-radius:10px" />
+          </div>
+          <div class="row">
+            <label>計測時間(秒)</label>
+            <input id="seconds" type="number" min="10" max="300" value="60" />
+          </div>
+          <div class="row">
+            <button id="start" class="primary">▶ 計測開始</button>
+            <button id="stop" class="danger">■ 停止</button>
+            <button id="skip">→ 次のペア</button>
+          </div>
+          <div class="row">
+            <div class="meter" style="flex:1"><div id="bar" class="bar"></div></div>
+            <span id="timeLeft" class="kbd">60s</span>
+          </div>
+
+          <div class="center" style="margin-top:8px">
+            <div class="pair">
+              <div id="codeA" class="code">—</div>
+              <div class="muted">→</div>
+              <div id="codeB" class="code">—</div>
+            </div>
+          </div>
+
+          <div class="center" style="margin-top:4px;gap:12px">
+            <div class="mid">カウント: <span id="count" class="big">0</span></div>
+          </div>
+          <p class="muted">操作: <span class="kbd">Space</span> カウント / <span class="kbd">Enter</span> 次ペア / <span class="kbd">Esc</span> 停止</p>
+        </section>
+
+        <!-- 右：結果・履歴 -->
+        <aside class="panel">
+          <h2>結果</h2>
+          <div class="result">
+            <div class="box"><div class="muted">CPM（1分あたり）</div><div class="mid" id="cpm">0</div></div>
+            <div class="box"><div class="muted">平均CPM</div><div class="mid" id="avgCpm">0</div></div>
+            <div class="box"><div class="muted">ベストCPM</div><div class="mid" id="bestCpm">0</div></div>
+            <div class="box"><div class="muted">本日の合計チェンジ</div><div class="mid" id="todayTotal">0</div></div>
+          </div>
+          <h3 style="margin-top:14px">セッション履歴</h3>
+          <div id="log"></div>
+          <div class="right"><button id="clearLog">履歴をクリア</button></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== ユーティリティ =====
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    function parsePairs(text){
+      return text.split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
+        const [a,b] = s.split(/[-→>]/).map(x=>x.trim());
+        return [a||'', b||''];
+      }).filter(([a,b])=>a && b);
+    }
+
+    const PRESETS = {
+      EZ: [['C','G'],['G','D'],['D','A'],['A','E'],['Em','Am']],
+      OPEN: [['C','Am'],['Am','G'],['G','Em'],['Em','D'],['D','C']],
+      POP: [['C','G'],['Am','F'],['G','Em'],['D','A'],['F','C']]
+    };
+
+    // ===== DOM =====
+    const preset = $('#preset');
+    const customPairs = $('#customPairs');
+    const seconds = $('#seconds');
+    const startBtn = $('#start');
+    const stopBtn = $('#stop');
+    const skipBtn = $('#skip');
+    const codeA = $('#codeA');
+    const codeB = $('#codeB');
+    const countEl = $('#count');
+    const timeLeft = $('#timeLeft');
+    const bar = $('#bar');
+
+    const cpmEl = $('#cpm');
+    const avgCpmEl = $('#avgCpm');
+    const bestCpmEl = $('#bestCpm');
+    const todayTotalEl = $('#todayTotal');
+    const logEl = $('#log');
+    const clearLogBtn = $('#clearLog');
+
+    // ===== 状態 =====
+    let pairs = PRESETS.EZ.slice();
+    let idx = 0;
+    let running = false;
+    let count = 0;
+    let tStart = 0;
+    let intID = null;
+
+    function pickPair(){ return pairs[idx % pairs.length]; }
+    function renderPair(){ const [a,b] = pickPair(); codeA.textContent=a; codeB.textContent=b; }
+
+    function setPairsFromUI(){
+      if(preset.value === 'CUSTOM'){
+        const p = parsePairs(customPairs.value);
+        pairs = p.length ? p : [['C','G']];
+      }else{
+        pairs = PRESETS[preset.value].slice();
+      }
+      idx = 0; renderPair();
+    }
+
+    preset.addEventListener('change', setPairsFromUI);
+    customPairs.addEventListener('change', setPairsFromUI);
+
+    function updateTimer(){
+      const dur = Number(seconds.value);
+      const elapsed = (Date.now() - tStart)/1000;
+      const left = Math.max(0, dur - elapsed);
+      timeLeft.textContent = left.toFixed(1)+'s';
+      const pct = Math.min(100, (elapsed/dur)*100);
+      bar.style.width = pct + '%';
+      if(left <= 0){ finish(); }
+    }
+
+    function start(){
+      if(running) return; running = true; count = 0; countEl.textContent = '0';
+      tStart = Date.now(); updateTimer();
+      intID = setInterval(updateTimer, 100);
+      renderPair();
+    }
+    function stop(){ running = false; clearInterval(intID); }
+
+    function finish(){
+      if(!running) return; stop();
+      const dur = Number(seconds.value);
+      const cpm = Math.round(count * (60/dur));
+      cpmEl.textContent = cpm;
+      // log
+      pushLog({time:new Date().toISOString(), pair: pickPair().join('-'), count, dur, cpm});
+      // 次のペアへ
+      idx++; renderPair();
+    }
+
+    function inc(){ if(!running) return; count++; countEl.textContent = count; }
+    function nextPair(){ idx++; renderPair(); if(running){ tStart = Date.now(); count = 0; countEl.textContent='0'; } }
+
+    startBtn.addEventListener('click', start);
+    stopBtn.addEventListener('click', stop);
+    skipBtn.addEventListener('click', nextPair);
+
+    document.addEventListener('keydown', (e)=>{
+      if(e.code==='Space'){ e.preventDefault(); inc(); }
+      if(e.code==='Enter'){ e.preventDefault(); nextPair(); }
+      if(e.code==='Escape'){ e.preventDefault(); stop(); }
+    });
+
+    // ===== 履歴（localStorage） =====
+    const KEY='oneMinChordLog';
+    function loadLog(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch{ return []; } }
+    function saveLog(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+    function pushLog(item){
+      const arr = loadLog(); arr.unshift(item); saveLog(arr); renderLog(); updateStats();
+    }
+    function renderLog(){
+      const arr = loadLog();
+      logEl.innerHTML = arr.slice(0,20).map(it=>{
+        const d = new Date(it.time);
+        const ds = d.toLocaleString();
+        return `<div class="box">${ds}<br><b>${it.pair}</b> — ${it.count}回 / ${it.dur}s（CPM ${it.cpm}）</div>`;
+      }).join('');
+    }
+
+    function updateStats(){
+      const arr = loadLog(); if(!arr.length){ cpmEl.textContent=avgCpmEl.textContent=bestCpmEl.textContent=todayTotalEl.textContent='0'; return; }
+      const avg = Math.round(arr.reduce((s,it)=>s+it.cpm,0)/arr.length);
+      const best = arr.reduce((m,it)=>Math.max(m,it.cpm),0);
+      const todayStr = new Date().toDateString();
+      const todayTotal = arr.filter(it=> new Date(it.time).toDateString()===todayStr).reduce((s,it)=>s+it.count,0);
+      avgCpmEl.textContent = avg; bestCpmEl.textContent = best; todayTotalEl.textContent = todayTotal;
+    }
+
+    clearLogBtn.addEventListener('click', ()=>{ if(confirm('履歴を削除しますか？')){ localStorage.removeItem(KEY); renderLog(); updateStats(); } });
+
+    // 初期化
+    setPairsFromUI(); renderLog(); updateStats();
+  </script>
+</body>
+</html>
