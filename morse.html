@@ -71,7 +71,7 @@
           <h2 style="margin:14px 0 6px">Manual Keyer</h2>
           <div class="row">
             <label>Speed (WPM)</label><input id="wpm" type="number" min="5" max="40" value="20" />
-            <label>Pitch (Hz)</label><input id="freq" type="number" min="200" max="1200" value="600" />
+            <label>Pitch (Hz)</label><input id="freq" type="number" min="200" max="1200" value="750" />
             <label>Volume</label><input id="vol" type="number" step="0.01" min="0" max="1" value="0.6" />
           </div>
           <div class="row">
@@ -197,7 +197,7 @@
     let ctx, outGain, osc;
     function ensureAudio(){ if(ctx) return; ctx = new (window.AudioContext||window.webkitAudioContext)(); outGain = ctx.createGain(); outGain.gain.value = Number(document.getElementById('vol').value||0.6); outGain.connect(ctx.destination); }
     function tone(on){
-      if(on){ ensureAudio(); if(osc) osc.stop(); osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.setValueAtTime(Number(document.getElementById('freq').value||600), ctx.currentTime); const g = ctx.createGain(); g.gain.setValueAtTime(1, ctx.currentTime); osc.connect(g); g.connect(outGain); osc.start(); return {osc,g}; }
+      if(on){ ensureAudio(); if(osc) osc.stop(); osc = ctx.createOscillator(); osc.type='square'; const f = Number(document.getElementById('freq').value||750); osc.frequency.setValueAtTime(f, ctx.currentTime); const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=f; bp.Q.value=12; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.002); osc.connect(bp); bp.connect(g); g.connect(outGain); osc.start(); return {osc,g}; }
       else{ if(osc){ try{ osc.stop(); }catch{} osc.disconnect(); osc=null; } }
     }
 
@@ -214,7 +214,7 @@
       const pitch = Number(document.getElementById('freq').value||600);
       seq.split('').forEach((ch,i)=>{
         if(ch==='.'){
-          const o = ctx.createOscillator(); const g = ctx.createGain(); o.type='sine'; o.frequency.value=pitch; g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.0001,t+u); o.connect(g); g.connect(outGain); o.start(t); o.stop(t+u); t += u + u; // 1 unit sound + 1 unit gap
+          const o = ctx.createOscillator(); const bp = ctx.createBiquadFilter(); const g = ctx.createGain(); o.type='square'; o.frequency.value=pitch; bp.type='bandpass'; bp.frequency.value=pitch; bp.Q.value=12; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(1, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + u); o.connect(bp); bp.connect(g); g.connect(outGain); o.start(t); o.stop(t + u); t += u + u; // 1 unit sound + 1 unit gap
         }else if(ch==='-'){
           const o = ctx.createOscillator(); const g = ctx.createGain(); o.type='sine'; o.frequency.value=pitch; g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.0001,t+3*u); o.connect(g); g.connect(outGain); o.start(t); o.stop(t+3*u); t += 3*u + u; // 3 sound + 1 gap
         }else if(ch===' '){ t += 2*u; } // we already added 1 after element; add 2 more to make 3 units between letters
