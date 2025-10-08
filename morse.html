@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Morse Trainer & Translator — Web</title>
+  <style>
+    :root{--bg:#f6fbff;--card:#fff;--text:#0f172a;--muted:#475569;--line:#e5eaf1;--primary:#2563eb;--accent:#22c55e;--danger:#ef4444}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(160deg,#f6fbff,#ffffff 40%,#f0f6ff);color:var(--text);padding:18px}
+    .wrap{max-width:1100px;margin:0 auto}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(15,23,42,.08);padding:20px}
+    h1{margin:0 0 8px}
+    p.sub{margin:0 0 14px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+    label{min-width:120px;color:var(--muted)}
+    input[type="number"],input[type="text"],textarea,select{padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+    textarea{width:100%;min-height:90px}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#eef2ff;border:1px solid #c7d2fe;padding:3px 6px;border-radius:8px}
+    button{appearance:none;border:1px solid #dbe2ea;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;background:#eef3fb}
+    .primary{background:var(--primary);border-color:#1d4ed8;color:#fff}
+    .danger{background:var(--danger);border-color:#b91c1c;color:#fff}
+    .ok{background:var(--accent);border-color:#16a34a;color:#fff}
+    .meter{height:12px;border-radius:999px;background:#eef2f7;border:1px solid var(--line);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#60a5fa,#34d399,#86efac)}
+    .small{font-size:12px;color:#64748b}
+    .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    @media (max-width:700px){.grid2{grid-template-columns:1fr}}
+    table{border-collapse:collapse;width:100%;font-size:14px}
+    th,td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left}
+    th{background:#f8fafc}
+    .pill{display:inline-flex;gap:6px;align-items:center;padding:6px 8px;border:1px solid #e5e7eb;border-radius:999px;margin:4px 6px 0 0}
+    .list{display:flex;flex-wrap:wrap}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Morse Trainer & Translator <span class="small">(WebAudio)</span></h1>
+      <p class="sub">Type text ↔ get Morse, play audio, and key your own signals. Includes common English words/phrases with Korean meanings. Press and hold <span class="kbd">Space</span> (or the big button) to key manually.</p>
+
+      <div class="grid">
+        <!-- LEFT: Translator + Keyer -->
+        <section class="panel">
+          <h2 style="margin:0 0 8px">Translator</h2>
+          <div class="grid2">
+            <div>
+              <h3 style="margin:6px 0">Text → Morse</h3>
+              <textarea id="plain" placeholder="Enter English text"></textarea>
+              <div class="row">
+                <button id="toMorse" class="primary">Convert →</button>
+                <button id="playMorseBtn">Play Morse</button>
+                <button id="clear1" class="danger">Clear</button>
+              </div>
+            </div>
+            <div>
+              <h3 style="margin:6px 0">Morse → Text</h3>
+              <textarea id="morse" placeholder="Use . and - with spaces between letters, / for words"></textarea>
+              <div class="row">
+                <button id="toText" class="primary">← Convert</button>
+                <button id="stop" class="danger">Stop Sound</button>
+                <button id="clear2" class="danger">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <h2 style="margin:14px 0 6px">Manual Keyer</h2>
+          <div class="row">
+            <label>Speed (WPM)</label><input id="wpm" type="number" min="5" max="40" value="20" />
+            <label>Pitch (Hz)</label><input id="freq" type="number" min="200" max="1200" value="600" />
+            <label>Volume</label><input id="vol" type="number" step="0.01" min="0" max="1" value="0.6" />
+          </div>
+          <div class="row">
+            <button id="keyBtn" class="ok" style="flex:1;height:56px">Hold to key (●)</button>
+          </div>
+          <div class="row small">Rules: dot=1 unit, dash=3 units, gap between parts=1, letters=3, words=7. Threshold for dash = 2× dot.</div>
+          <div class="row">
+            <label>Live keyed</label>
+            <input id="liveMorse" class="mono" type="text" style="flex:1" placeholder="your keyed code will appear here" />
+            <button id="resetKeyed" class="danger">Reset</button>
+          </div>
+        </section>
+
+        <!-- RIGHT: Reference + Phrases -->
+        <aside class="panel">
+          <h2 style="margin:0 0 8px">Phrases (EN → 뜻/KR)</h2>
+          <div class="list" id="phraseList"></div>
+          <div class="small" style="margin-top:6px">Click a pill to insert & play</div>
+
+          <h2 style="margin:12px 0 6px">Morse Reference</h2>
+          <div style="max-height:340px;overflow:auto;border:1px solid #e5e7eb;border-radius:10px">
+            <table>
+              <thead><tr><th>Char</th><th>Morse</th><th>Char</th><th>Morse</th></tr></thead>
+              <tbody id="refTable"></tbody>
+            </table>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Morse maps =====
+    const MORSE = {
+      'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+      '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
+      '.':'.-.-.-', ',':'--..--', '?':'..--..', "'":'.----.', '!':'-.-.--', '/':'-..-.', '(':'-.--.', ')':'-.--.-', '&':'.-...', ':':'---...', ';':'-.-.-.', '=':'-...-', '+':'.-.-.', '-':'-....-', '_':'..--.-', '"':'.-..-.', '$':'...-..-', '@':'.--.-.'
+    };
+    const REVERSE = Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+
+    // ===== Phrases (English with Korean meaning) =====
+    const PHRASES = [
+      ['SOS','긴급 구조 요청'],
+      ['HELLO','안녕'],
+      ['PLEASE','부탁합니다'],
+      ['THANK YOU','고마워요'],
+      ['YES','예'],
+      ['NO','아니오'],
+      ['HELP','도와주세요'],
+      ['WHERE ARE YOU','어디에 있나요'],
+      ['WHAT HAPPENED','무슨 일이에요'],
+      ['EMERGENCY','비상 상황'],
+      ['GOOD MORNING','좋은 아침'],
+      ['GOOD NIGHT','잘 자요'],
+      ['I NEED WATER','물 필요해요'],
+      ['CALL THE POLICE','경찰을 불러주세요']
+    ];
+
+    // ===== Build reference table =====
+    const refTable = document.getElementById('refTable');
+    (function buildRef(){
+      const keys = Object.keys(MORSE);
+      const cols = 2; // two columns of char+morse pairs
+      const rows = Math.ceil(keys.length/cols);
+      for(let r=0;r<rows;r++){
+        const tr = document.createElement('tr');
+        for(let c=0;c<cols;c++){
+          const i = r + c*rows;
+          const ch = keys[i];
+          if(ch){
+            const td1 = document.createElement('td'); td1.textContent = ch;
+            const td2 = document.createElement('td'); td2.textContent = MORSE[ch]; td2.className='mono';
+            tr.appendChild(td1); tr.appendChild(td2);
+          }else{
+            tr.appendChild(document.createElement('td'));
+            tr.appendChild(document.createElement('td'));
+          }
+        }
+        refTable.appendChild(tr);
+      }
+    })();
+
+    // ===== Phrase pills =====
+    const phraseList = document.getElementById('phraseList');
+    const plain = document.getElementById('plain');
+    const morse = document.getElementById('morse');
+
+    PHRASES.forEach(([en,kr])=>{
+      const el = document.createElement('button');
+      el.className='pill';
+      el.innerHTML = `<b>${en}</b><span class="small">— ${kr}</span>`;
+      el.addEventListener('click', ()=>{ plain.value = en; toMorse(); playMorse(); });
+      phraseList.appendChild(el);
+    });
+
+    // ===== Convertors =====
+    function textToMorse(s){
+      return s.toUpperCase().split('').map(ch=>{
+        if(ch===' '){return '/';}
+        return MORSE[ch] || '';
+      }).filter(Boolean).join(' ');
+    }
+    function morseToText(s){
+      return s.trim().split(/\s+/).map(tok=>{
+        if(tok==='/'){return ' ';}
+        return REVERSE[tok]||'';
+      }).join('');
+    }
+
+    const toMorseBtn = document.getElementById('toMorse');
+    const toTextBtn = document.getElementById('toText');
+    const clear1 = document.getElementById('clear1');
+    const clear2 = document.getElementById('clear2');
+
+    function toMorse(){ morse.value = textToMorse(plain.value); }
+    function toText(){ plain.value = morseToText(morse.value); }
+    toMorseBtn.addEventListener('click', toMorse);
+    toTextBtn.addEventListener('click', toText);
+    clear1.addEventListener('click', ()=>{ plain.value=''; });
+    clear2.addEventListener('click', ()=>{ morse.value=''; });
+
+    // ===== Audio (WebAudio) =====
+    let ctx, outGain, osc;
+    function ensureAudio(){ if(ctx) return; ctx = new (window.AudioContext||window.webkitAudioContext)(); outGain = ctx.createGain(); outGain.gain.value = Number(document.getElementById('vol').value||0.6); outGain.connect(ctx.destination); }
+    function tone(on){
+      if(on){ ensureAudio(); if(osc) osc.stop(); osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.setValueAtTime(Number(document.getElementById('freq').value||600), ctx.currentTime); const g = ctx.createGain(); g.gain.setValueAtTime(1, ctx.currentTime); osc.connect(g); g.connect(outGain); osc.start(); return {osc,g}; }
+      else{ if(osc){ try{ osc.stop(); }catch{} osc.disconnect(); osc=null; } }
+    }
+
+    function unitMS(){ // dot duration (PARIS standard): 1200 / WPM ms
+      const wpm = Math.max(5, Math.min(40, Number(document.getElementById('wpm').value||20)));
+      return 1200 / wpm;
+    }
+
+    function playMorse(){
+      ensureAudio(); if(ctx.state==='suspended') ctx.resume();
+      const u = unitMS()/1000; // seconds
+      const seq = morse.value.trim();
+      let t = ctx.currentTime + 0.05;
+      const pitch = Number(document.getElementById('freq').value||600);
+      seq.split('').forEach((ch,i)=>{
+        if(ch==='.'){
+          const o = ctx.createOscillator(); const g = ctx.createGain(); o.type='sine'; o.frequency.value=pitch; g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.0001,t+u); o.connect(g); g.connect(outGain); o.start(t); o.stop(t+u); t += u + u; // 1 unit sound + 1 unit gap
+        }else if(ch==='-'){
+          const o = ctx.createOscillator(); const g = ctx.createGain(); o.type='sine'; o.frequency.value=pitch; g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.0001,t+3*u); o.connect(g); g.connect(outGain); o.start(t); o.stop(t+3*u); t += 3*u + u; // 3 sound + 1 gap
+        }else if(ch===' '){ t += 2*u; } // we already added 1 after element; add 2 more to make 3 units between letters
+        else if(ch==='/'){ t += 6*u; } // add 6 more to make 7 units between words
+      });
+    }
+    document.getElementById('playMorseBtn').addEventListener('click', playMorse);
+    document.getElementById('stop').addEventListener('click', ()=>{ if(ctx){ ctx.close(); ctx=null; } });
+
+    // ===== Manual keyer (space or button) =====
+    const keyBtn = document.getElementById('keyBtn');
+    const liveMorse = document.getElementById('liveMorse');
+    const resetKeyed = document.getElementById('resetKeyed');
+    let keyDownAt=0, lastUpAt=0, gapTimer=null;
+
+    function onKeyDown(){
+      ensureAudio(); if(ctx.state==='suspended') ctx.resume();
+      if(!keyDownAt){ tone(true); keyDownAt = performance.now(); clearTimeout(gapTimer); }
+    }
+    function onKeyUp(){
+      if(!keyDownAt) return; const now = performance.now(); tone(false);
+      const dot = unitMS(); const dur = now - keyDownAt; keyDownAt=0; lastUpAt = now;
+      const symbol = dur < 2*dot ? '.' : '-';
+      liveMorse.value += symbol;
+      // set gap classifier
+      clearTimeout(gapTimer);
+      gapTimer = setTimeout(()=>{
+        // if silence >= 3*dot treat as letter gap; if >= 7*dot treat as word gap
+        const silence = performance.now() - lastUpAt;
+        if(silence >= 7*dot) liveMorse.value += ' / ';
+        else if(silence >= 3*dot) liveMorse.value += ' ';
+      }, 3*dot);
+    }
+
+    keyBtn.addEventListener('pointerdown', e=>{e.preventDefault(); onKeyDown();});
+    keyBtn.addEventListener('pointerup', e=>{e.preventDefault(); onKeyUp();});
+    document.addEventListener('keydown', e=>{ if(e.code==='Space'){ e.preventDefault(); onKeyDown(); }});
+    document.addEventListener('keyup', e=>{ if(e.code==='Space'){ e.preventDefault(); onKeyUp(); }});
+
+    resetKeyed.addEventListener('click', ()=>{ liveMorse.value=''; });
+
+    // Quick sync: update morse when typing plain
+    document.getElementById('toMorse').click = toMorse;
+  </script>
+</body>
+</html>
