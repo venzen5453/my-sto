@@ -546,34 +546,39 @@
 
   
 <script>
-/* ===== 🎮 리듬게임 모드 (4레인) ===== */
+/* ===== 🎮 리듬게임 모드 (4레인, 시각화+빛남) ===== */
 let gameMode = false;
 let score = 0, combo = 0;
-const hitWindowPerfect = 0.08; // ±80ms以内 = Perfect
-const hitWindowGood = 0.15;    // ±150ms以内 = Good
+const hitWindowPerfect = 0.08;
+const hitWindowGood = 0.15;
 let upcomingNotes = [];
+const lanes = ["S", "D", "L", ";"]; // ← 키 표시용
 
-const lanes = ["S", "D", ";", "'"];
+/* 🎨 스타일용 공통 함수 */
+function makeGlow(el, color) {
+  el.style.boxShadow = `0 0 25px 8px ${color}`;
+  setTimeout(() => (el.style.boxShadow = ""), 150);
+}
 
-// 🎯 게임 영역 생성
+/* 🎯 게임 영역 */
 const gameArea = document.createElement("div");
 Object.assign(gameArea.style, {
   position: "fixed",
-  bottom: "0",
+  bottom: "120px",
   left: "50%",
   transform: "translateX(-50%)",
   width: "600px",
-  height: "350px",
-  background: "rgba(255,255,255,0.85)",
+  height: "380px",
+  background: "rgba(255,255,255,0.95)",
   border: "2px solid #cbd5e1",
   borderRadius: "20px",
-  boxShadow: "0 0 25px rgba(0,0,0,0.15)",
+  boxShadow: "0 0 25px rgba(0,0,0,0.1)",
   overflow: "hidden",
   display: "none",
 });
 document.body.appendChild(gameArea);
 
-// 🎵 레인 4개 생성
+/* 🎵 레인 4개 생성 */
 const laneWidth = 600 / lanes.length;
 lanes.forEach((key, i) => {
   const lane = document.createElement("div");
@@ -599,13 +604,46 @@ lanes.forEach((key, i) => {
     marginBottom: "10px",
     borderRadius: "8px",
     background: "#cbd5e1",
+    transition: "0.1s",
   });
   target.className = "target-" + key;
   lane.appendChild(target);
   gameArea.appendChild(lane);
 });
 
-// 🎯 HUD
+/* 🎹 키패드 표시 */
+const keyPad = document.createElement("div");
+Object.assign(keyPad.style, {
+  position: "fixed",
+  bottom: "20px",
+  left: "50%",
+  transform: "translateX(-50%)",
+  display: "flex",
+  gap: "20px",
+});
+lanes.forEach((k) => {
+  const keyEl = document.createElement("div");
+  keyEl.id = "key-" + k;
+  Object.assign(keyEl.style, {
+    width: "70px",
+    height: "70px",
+    borderRadius: "12px",
+    background: "#f1f5f9",
+    boxShadow: "inset 0 0 6px #cbd5e1",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "26px",
+    fontWeight: "700",
+    color: "#1e293b",
+    transition: "0.1s",
+  });
+  keyEl.textContent = k;
+  keyPad.appendChild(keyEl);
+});
+document.body.appendChild(keyPad);
+
+/* 🎯 HUD */
 const hud = document.createElement("div");
 Object.assign(hud.style, {
   position: "fixed",
@@ -618,7 +656,7 @@ Object.assign(hud.style, {
 hud.innerHTML = "🎯 SCORE: 0<br>🔥 COMBO: 0";
 document.body.appendChild(hud);
 
-// 🎆 판정 텍스트
+/* 🎆 판정 텍스트 */
 const judge = document.createElement("div");
 Object.assign(judge.style, {
   position: "fixed",
@@ -631,19 +669,19 @@ Object.assign(judge.style, {
 });
 document.body.appendChild(judge);
 
-// 🎶 노트 생성
+/* 🎵 노트 생성 */
 function spawnNote(time) {
-  const laneIndex = Math.floor(Math.random() * 4); // 랜덤 레인
+  const laneIndex = Math.floor(Math.random() * 4);
   const laneKey = lanes[laneIndex];
   const note = document.createElement("div");
   note.dataset.time = time;
   note.dataset.lane = laneKey;
   Object.assign(note.style, {
     position: "absolute",
-    left: laneIndex * laneWidth + laneWidth / 2 - 15 + "px",
-    bottom: "350px",
-    width: "30px",
-    height: "18px",
+    left: laneIndex * laneWidth + laneWidth / 2 - 18 + "px",
+    bottom: "380px",
+    width: "36px",
+    height: "20px",
     borderRadius: "8px",
     background: "#2563eb",
     transform: "translateX(-50%)",
@@ -658,7 +696,7 @@ function spawnNote(time) {
   upcomingNotes.push({ time, lane: laneKey, el: note, hit: false });
 }
 
-// 🎵 메트로놈 스케줄에 연결
+/* 🎶 메트로놈과 연결 */
 const origSchedule = schedule;
 schedule = function () {
   while (running && nextNoteTime < ctx.currentTime + scheduleAheadTime) {
@@ -669,17 +707,28 @@ schedule = function () {
     }
     queueBeatUI(nextNoteTime, beatIdx);
     rhythmAdvance(nextNoteTime);
-    if (gameMode) spawnNote(nextNoteTime); // 🎮 노트 생성
+    if (gameMode) spawnNote(nextNoteTime);
     nextNote();
   }
   timerID = setTimeout(schedule, lookahead);
 };
 
-// 🎹 키 입력 판정
+/* 🎹 키 입력 판정 */
 document.addEventListener("keydown", (e) => {
   if (!gameMode) return;
   const key = e.key.toUpperCase();
   if (!lanes.includes(key)) return;
+
+  const keyEl = document.getElementById("key-" + key);
+  if (keyEl) {
+    keyEl.style.background = "#2563eb";
+    keyEl.style.color = "#fff";
+    makeGlow(keyEl, "#60a5fa");
+    setTimeout(() => {
+      keyEl.style.background = "#f1f5f9";
+      keyEl.style.color = "#1e293b";
+    }, 150);
+  }
 
   const now = ctx.currentTime;
   const note = upcomingNotes.find(
@@ -697,17 +746,20 @@ document.addEventListener("keydown", (e) => {
     if (diff < hitWindowPerfect) {
       judge.innerText = "PERFECT!";
       judge.style.color = "#22c55e";
+      makeGlow(keyEl, "#86efac");
       score += 100;
       combo++;
     } else {
       judge.innerText = "GOOD!";
       judge.style.color = "#3b82f6";
+      makeGlow(keyEl, "#93c5fd");
       score += 50;
       combo++;
     }
   } else {
     judge.innerText = "MISS!";
     judge.style.color = "#ef4444";
+    makeGlow(keyEl, "#fca5a5");
     combo = 0;
   }
 
@@ -715,7 +767,7 @@ document.addEventListener("keydown", (e) => {
   setTimeout(() => (judge.innerText = ""), 300);
 });
 
-// 🎮 시작 버튼
+/* 🎮 시작 버튼 */
 const gameBtn = document.createElement("button");
 gameBtn.textContent = "🎮 리듬게임 시작";
 gameBtn.className = "btn-primary";
@@ -729,6 +781,7 @@ gameBtn.addEventListener("click", () => {
     combo = 0;
     gameMode = true;
     gameArea.style.display = "block";
+    keyPad.style.display = "flex";
     gameBtn.textContent = "🛑 게임 종료";
     start(false);
   } else {
@@ -737,10 +790,12 @@ gameBtn.addEventListener("click", () => {
     upcomingNotes.forEach((n) => n.el.remove());
     upcomingNotes = [];
     gameArea.style.display = "none";
+    keyPad.style.display = "none";
     gameBtn.textContent = "🎮 리듬게임 시작";
   }
 });
 </script>
+
 
 
 </body>
