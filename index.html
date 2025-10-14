@@ -675,52 +675,64 @@ function glowKey(keyEl, color) {
 }
 
 /* 🎵 노트 생성 (裏拍) */
+/* 🎵 노트 생성 (정확한 판정 싱크 + 크기 보정) */
 function spawnNote(time, isOffbeat = false) {
   const laneIndex = Math.floor(Math.random() * 4);
   const laneKey = lanes[laneIndex];
+
   const note = document.createElement("div");
   note.dataset.time = time;
   note.dataset.lane = laneKey;
 
   Object.assign(note.style, {
     position: "absolute",
-    left: laneIndex * laneWidth + laneWidth / 2 - 25 + "px",
-    bottom: "480px",
-    width: "50px",
-    height: "30px",
-    borderRadius: "10px",
-    background: "#2563eb",
-    boxShadow: "0 0 10px rgba(37,99,235,0.5)",
+    left: laneIndex * laneWidth + laneWidth / 2 - 30 + "px",
+    bottom: "480px", // 시작 위치
+    width: "60px",
+    height: "40px", // 🔹 크기 키움
+    borderRadius: "12px",
+    background: "linear-gradient(180deg,#3b82f6,#2563eb)",
+    boxShadow: "0 0 15px rgba(37,99,235,0.5)",
     opacity: "0.95",
     transform: "translateX(-50%)",
   });
   gameArea.appendChild(note);
 
-  // 🎵 노트가 박자에 맞춰 라인에 닿게
+  /* 🎯 노트가 정확히 타겟 막대 중앙에 닿을 타이밍 계산 */
   const secPerBeat = 60 / Number(bpm.value);
-  const dropDuration = secPerBeat * 1.25; // BPM 따라 조정
+  const dropDuration = secPerBeat * 1.4; // 낙하속도 보정 (느릴수록 자연)
   const travelStart = time - dropDuration;
   const startDelay = Math.max(0, (travelStart - ctx.currentTime) * 1000);
 
+  // 애니메이션 시작
   setTimeout(() => {
     note.style.transition = `bottom ${dropDuration}s linear`;
-    note.style.bottom = "94px";
+    note.style.bottom = "106px"; // 타겟 라인의 중심에 딱 닿게 설정
   }, startDelay);
 
-  setTimeout(() => note.remove(), (dropDuration + 0.6) * 1000);
-  upcomingNotes.push({ time, lane: laneKey, el: note, hit: false, offbeat: isOffbeat });
+  // 🎵 완전 도착 시 자동 제거
+  setTimeout(() => note.remove(), (dropDuration + 0.7) * 1000);
+
+  upcomingNotes.push({
+    time,
+    lane: laneKey,
+    el: note,
+    hit: false,
+    offbeat: isOffbeat,
+  });
 }
 
-/* 🎶 메트로놈 연동 (裏拍 중심) */
+/* 🎶 메트로놈 연동 (裏拍 기준) */
 const origSchedule = schedule;
 schedule = function () {
   while (running && nextNoteTime < ctx.currentTime + scheduleAheadTime) {
     clickSound(nextNoteTime, { accent: accent1.checked && beatIdx === 0 });
 
+    // 뒷박 타이밍 (앤드)
     const half = (60 / Number(bpm.value)) / 2;
     if (offbeatToggle.checked) {
       offbeatSound(nextNoteTime + half);
-      if (gameMode) spawnNote(nextNoteTime + half, true); // 뒷박 노트
+      if (gameMode) spawnNote(nextNoteTime + half, true); // 🎯 뒷박 생성
     } else {
       if (gameMode) spawnNote(nextNoteTime);
     }
@@ -732,14 +744,14 @@ schedule = function () {
   timerID = setTimeout(schedule, lookahead);
 };
 
-/* 🎹 판정 로직 */
+/* 🎹 판정 로직 — 노트가 타겟라인과 겹칠 때 PERFECT */
 document.addEventListener("keydown", (e) => {
   if (!gameMode) return;
   const key = e.key.toUpperCase();
   if (!lanes.includes(key)) return;
 
   const keyEl = document.getElementById("key-" + key);
-  if (keyEl) glowKey(keyEl, "#60a5fa");
+  glowKey(keyEl, "#60a5fa");
 
   const now = ctx.currentTime;
   const note = upcomingNotes.find(
@@ -747,29 +759,26 @@ document.addEventListener("keydown", (e) => {
   );
 
   if (note) {
-    const diff = Math.abs(now - note.time);
     note.hit = true;
-    note.el.style.background = "#86efac";
-    note.el.style.boxShadow = "0 0 20px rgba(34,197,94,0.8)";
-    setTimeout(() => note.el.remove(), 120);
+    note.el.style.background = "#22c55e";
+    note.el.style.boxShadow = "0 0 25px rgba(34,197,94,0.9)";
+    setTimeout(() => note.el.remove(), 150);
 
+    const diff = Math.abs(now - note.time);
     if (diff < hitWindowPerfect) {
       judge.innerText = "PERFECT!";
       judge.style.color = "#22c55e";
-      glowKey(keyEl, "#22c55e");
       score += 100;
       combo++;
     } else {
       judge.innerText = "GOOD!";
       judge.style.color = "#3b82f6";
-      glowKey(keyEl, "#3b82f6");
       score += 50;
       combo++;
     }
   } else {
     judge.innerText = "MISS!";
     judge.style.color = "#ef4444";
-    glowKey(keyEl, "#ef4444");
     combo = 0;
   }
 
