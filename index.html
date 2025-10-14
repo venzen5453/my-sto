@@ -686,13 +686,25 @@ function spawnNote(time) {
   });
   gameArea.appendChild(note);
 
-  const fallTime = (time - ctx.currentTime) * 1000;
+  // 🎵 "노트가 정확히 박자에 맞춰 도착"하도록 조정
+  const secPerBeat = 60 / Number(bpm.value);
+  const dropDuration = secPerBeat * 1.3;  // 속도 보정 (기존보다 약간 느리게)
+  const travelStart = time - dropDuration; // 시작 시점 계산
+
+  // 현재 시간보다 조금 앞서면 바로 시작
+  const startDelay = Math.max(0, (travelStart - ctx.currentTime) * 1000);
+
   setTimeout(() => {
-    note.style.transition = `bottom ${(60 / Number(bpm.value)) * 0.9}s linear`;
-    note.style.bottom = "84px";
-  }, Math.max(0, fallTime - 300));
+    note.style.transition = `bottom ${dropDuration}s linear`;
+    note.style.bottom = "84px"; // 타겟라인 도착 높이
+  }, startDelay);
+
+  // 너무 늦게 남은 노트는 제거
+  setTimeout(() => note.remove(), (dropDuration + 0.5) * 1000);
+
   upcomingNotes.push({ time, lane: laneKey, el: note, hit: false });
 }
+
 
 /* 🎶 메트로놈 연결 */
 const origSchedule = schedule;
