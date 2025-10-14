@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AI 자동 대화 어플 💬</title>
+  <style>
+    body { font-family: 'Noto Sans KR', sans-serif; background: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    h1 { color: #2563eb; }
+    #chat { width: 400px; height: 500px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow-y: scroll; padding: 10px; }
+    .msg { margin: 5px 0; padding: 8px 10px; border-radius: 8px; max-width: 80%; }
+    .user { background: #2563eb; color: white; margin-left: auto; }
+    .ai { background: #e2e8f0; color: #1e293b; margin-right: auto; }
+    #input { display: flex; width: 400px; margin-top: 10px; }
+    input { flex: 1; padding: 10px; border-radius: 8px 0 0 8px; border: 1px solid #ccc; }
+    button { background: #2563eb; color: white; border: none; border-radius: 0 8px 8px 0; padding: 10px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🤖 AI 대화 어플</h1>
+  <div id="chat"></div>
+  <div id="input">
+    <input id="userInput" placeholder="메시지를 입력하세요..." />
+    <button onclick="sendMessage()">보내기</button>
+  </div>
+
+  <script>
+    const apiKey = "YOUR_API_KEY"; // 여기에 OpenAI API 키 넣기
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const chat = document.getElementById('chat');
+      const text = input.value.trim();
+      if (!text) return;
+      appendMessage('user', text);
+      input.value = '';
+
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: text }]
+        })
+      });
+
+      const data = await res.json();
+      const reply = data.choices[0].message.content;
+      appendMessage('ai', reply);
+    }
+
+    function appendMessage(role, text) {
+      const chat = document.getElementById('chat');
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.innerText = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
