@@ -543,5 +543,129 @@
       });
     });
   </script>
+  <script>
+/* ===== 🎮 リズムゲーム モード追加 ===== */
+let gameMode = false;
+let score = 0, combo = 0;
+const hitWindowPerfect = 0.08; // ±80ms以内 = Perfect
+const hitWindowGood = 0.15;    // ±150ms以内 = Good
+let upcomingNotes = []; // 次のノートタイミングリスト
+
+// HUD表示
+const hud = document.createElement('div');
+hud.style.position = 'fixed';
+hud.style.top = '20px';
+hud.style.right = '20px';
+hud.style.fontSize = '18px';
+hud.style.fontWeight = '700';
+hud.style.color = '#2563eb';
+hud.innerHTML = "🎯 SCORE: 0<br>🔥 COMBO: 0";
+document.body.appendChild(hud);
+
+// 判定表示
+const judge = document.createElement('div');
+judge.style.position = 'fixed';
+judge.style.top = '50%';
+judge.style.left = '50%';
+judge.style.transform = 'translate(-50%, -50%)';
+judge.style.fontSize = '42px';
+judge.style.fontWeight = '800';
+judge.style.color = '#22c55e';
+judge.style.textShadow = '0 0 10px rgba(0,0,0,0.3)';
+document.body.appendChild(judge);
+
+// ノート生成と進行バー同期
+function spawnNote(time){
+  upcomingNotes.push({ time, hit:false });
+  const note = document.createElement('div');
+  note.className = 'note';
+  Object.assign(note.style, {
+    position:'fixed',
+    bottom:'20px',
+    left:'50%',
+    width:'20px',
+    height:'20px',
+    borderRadius:'50%',
+    background:'#2563eb',
+    transform:'translateX(-50%)',
+    transition:'bottom 0.5s linear'
+  });
+  document.body.appendChild(note);
+  const travel = (time - ctx.currentTime) * 1000;
+  setTimeout(()=> note.style.bottom = '200px', travel);
+  setTimeout(()=> note.remove(), travel + 600);
+}
+
+function scheduleGameNote(){
+  if(!gameMode) return;
+  spawnNote(nextNoteTime);
+}
+
+// 既存 schedule() 内に下行を追加してもOK
+const origSchedule = schedule;
+schedule = function(){
+  while (running && nextNoteTime < ctx.currentTime + scheduleAheadTime){
+    clickSound(nextNoteTime, {accent: accent1.checked && beatIdx === 0});
+    if (offbeatToggle.checked){
+      const half = (60 / Number(bpm.value)) / 2;
+      offbeatSound(nextNoteTime + half);
+    }
+    queueBeatUI(nextNoteTime, beatIdx);
+    rhythmAdvance(nextNoteTime);
+    if(gameMode) scheduleGameNote(); // 🎮ここ追加！
+    nextNote();
+  }
+  timerID = setTimeout(schedule, lookahead);
+};
+
+// キー入力判定
+document.addEventListener('keydown', e=>{
+  if(!gameMode) return;
+  if(!['s','d',';',"\'"].includes(e.key.toLowerCase())) return;
+
+  const now = ctx.currentTime;
+  const note = upcomingNotes.find(n=>!n.hit && Math.abs(now - n.time) < hitWindowGood);
+  if(note){
+    const diff = Math.abs(now - note.time);
+    note.hit = true;
+    if(diff < hitWindowPerfect){
+      judge.innerText = "PERFECT!";
+      judge.style.color = "#22c55e";
+      score += 100; combo++;
+    } else {
+      judge.innerText = "GOOD!";
+      judge.style.color = "#3b82f6";
+      score += 50; combo++;
+    }
+  }else{
+    judge.innerText = "MISS!";
+    judge.style.color = "#ef4444";
+    combo = 0;
+  }
+  hud.innerHTML = `🎯 SCORE: ${score}<br>🔥 COMBO: ${combo}`;
+  setTimeout(()=>judge.innerText="",300);
+});
+
+// ゲームモード切替ボタン
+const gameBtn = document.createElement('button');
+gameBtn.textContent = "🎮 リズムゲーム開始";
+gameBtn.className = "btn-primary";
+gameBtn.style.marginTop = "16px";
+document.querySelector('.card').appendChild(gameBtn);
+
+gameBtn.addEventListener('click', ()=>{
+  ensureAudio();
+  if(!gameMode){
+    score=0; combo=0; gameMode=true;
+    gameBtn.textContent = "🛑 ゲーム終了";
+    start(false);
+  }else{
+    gameMode=false;
+    stop();
+    gameBtn.textContent = "🎮 リズム게임開始";
+  }
+});
+</script>
+
 </body>
 </html>
