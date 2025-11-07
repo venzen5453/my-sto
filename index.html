@@ -547,274 +547,143 @@
 
 
 
+<!------------------------------------------------------------------------------------->
 
+  <!-- 🎮 새 리듬게임 기능 -->
+  <script>
+    const gameContainer = document.createElement('div');
+    gameContainer.style.marginTop = '40px';
+    gameContainer.style.textAlign = 'center';
+    document.querySelector('.card').appendChild(gameContainer);
 
+    const title = document.createElement('h2');
+    title.textContent = '🎮 シンプル・リズムゲーム';
+    gameContainer.appendChild(title);
 
+    const game = document.createElement('div');
+    game.id = 'rhythmGame';
+    Object.assign(game.style, {
+      position: 'relative',
+      width: '400px',
+      height: '600px',
+      margin: '0 auto',
+      background: '#222',
+      border: '3px solid #555',
+      overflow: 'hidden',
+      borderRadius: '20px'
+    });
+    gameContainer.appendChild(game);
 
-  
-<script>
-/* ===== 🎮 리듬게임 모드（裏拍対応＋싱크 보정＋디자인 업） ===== */
-let gameMode = false;
-let score = 0, combo = 0;
-const hitWindowPerfect = 0.08;
-const hitWindowGood = 0.15;
-let upcomingNotes = [];
-const lanes = ["S", "D", "L", ";"];
+    const line = document.createElement('div');
+    line.id = 'line';
+    Object.assign(line.style, {
+      position: 'absolute',
+      bottom: '100px',
+      left: '0',
+      width: '100%',
+      height: '4px',
+      background: '#ff0077'
+    });
+    game.appendChild(line);
 
-/* 🎯 게임 영역 */
-const gameArea = document.createElement("div");
-Object.assign(gameArea.style, {
-  position: "fixed",
-  bottom: "60px",
-  left: "50%",
-  transform: "translateX(-50%)",
-  width: "620px",
-  height: "480px",
-  background: "rgba(255,255,255,0.8)",
-  backdropFilter: "blur(10px)",
-  border: "1px solid #dbeafe",
-  borderRadius: "24px",
-  boxShadow: "0 0 40px rgba(0,0,0,0.15)",
-  overflow: "hidden",
-  display: "none",
-});
-document.body.appendChild(gameArea);
+    const scoreLabel = document.createElement('div');
+    scoreLabel.id = 'score';
+    scoreLabel.textContent = 'Score: 0';
+    Object.assign(scoreLabel.style, {
+      color: '#222',
+      fontSize: '22px',
+      fontWeight: 'bold',
+      marginTop: '10px'
+    });
+    gameContainer.appendChild(scoreLabel);
 
-/* 🎵 레인 */
-const laneWidth = 620 / lanes.length;
-lanes.forEach((key, i) => {
-  const lane = document.createElement("div");
-  Object.assign(lane.style, {
-    position: "absolute",
-    bottom: "0",
-    left: i * laneWidth + "px",
-    width: laneWidth + "px",
-    height: "100%",
-    borderLeft: i ? "1px solid #e2e8f0" : "none",
-    borderRight: "1px solid #e2e8f0",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  });
+    const startBtn = document.createElement('button');
+    startBtn.textContent = '▶ スタート';
+    Object.assign(startBtn.style, {
+      background: '#2563eb',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '10px',
+      padding: '10px 20px',
+      fontSize: '16px',
+      cursor: 'pointer',
+      transition: '0.15s'
+    });
+    startBtn.onmouseover = () => startBtn.style.transform = 'translateY(-2px)';
+    startBtn.onmouseout = () => startBtn.style.transform = 'none';
+    gameContainer.appendChild(startBtn);
 
-  // 🎯 타겟 라인
-  const target = document.createElement("div");
-  Object.assign(target.style, {
-    width: "80%",
-    height: "16px",
-    marginBottom: "12px",
-    borderRadius: "10px",
-    background: "linear-gradient(90deg, #cbd5e1, #94a3b8)",
-    transition: "0.1s",
-    boxShadow: "0 0 6px rgba(0,0,0,0.1)",
-  });
-  target.className = "target-" + key;
-  lane.appendChild(target);
+    let notes = [];
+    let score = 0;
+    let running = false;
+    let createTimer, moveTimer;
 
-  // 🎹 키패드
-  const keyEl = document.createElement("div");
-  keyEl.id = "key-" + key;
-  Object.assign(keyEl.style, {
-    width: "80px",
-    height: "80px",
-    borderRadius: "18px",
-    marginBottom: "14px",
-    background: "#f8fafc",
-    boxShadow: "inset 0 0 8px #cbd5e1",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: "30px",
-    fontWeight: "700",
-    color: "#1e293b",
-    transition: "0.15s all",
-  });
-  keyEl.textContent = key;
-  lane.appendChild(keyEl);
-
-  gameArea.appendChild(lane);
-});
-
-/* 🎯 HUD */
-const hud = document.createElement("div");
-Object.assign(hud.style, {
-  position: "fixed",
-  top: "20px",
-  right: "20px",
-  fontSize: "18px",
-  fontWeight: "700",
-  color: "#2563eb",
-});
-hud.innerHTML = "🎯 SCORE: 0<br>🔥 COMBO: 0";
-document.body.appendChild(hud);
-
-/* ✨ 판정 텍스트 */
-const judge = document.createElement("div");
-Object.assign(judge.style, {
-  position: "fixed",
-  top: "45%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  fontSize: "48px",
-  fontWeight: "800",
-  textShadow: "0 0 10px rgba(0,0,0,0.3)",
-});
-document.body.appendChild(judge);
-
-/* 💡 키 반짝임 */
-function glowKey(keyEl, color) {
-  keyEl.style.background = color;
-  keyEl.style.boxShadow = `0 0 25px ${color}`;
-  keyEl.style.color = "#fff";
-  setTimeout(() => {
-    keyEl.style.background = "#f8fafc";
-    keyEl.style.boxShadow = "inset 0 0 8px #cbd5e1";
-    keyEl.style.color = "#1e293b";
-  }, 180);
-}
-
-/* 🎵 노트 생성 (裏拍) */
-/* 🎵 노트 생성 (정확한 판정 싱크 + 크기 보정) */
-function spawnNote(time, isOffbeat = false) {
-  const laneIndex = Math.floor(Math.random() * 4);
-  const laneKey = lanes[laneIndex];
-
-  const note = document.createElement("div");
-  note.dataset.time = time;
-  note.dataset.lane = laneKey;
-
-  Object.assign(note.style, {
-    position: "absolute",
-    left: laneIndex * laneWidth + laneWidth / 2 - 30 + "px",
-    bottom: "480px", // 시작 위치
-    width: "60px",
-    height: "40px", // 🔹 크기 키움
-    borderRadius: "12px",
-    background: "linear-gradient(180deg,#3b82f6,#2563eb)",
-    boxShadow: "0 0 15px rgba(37,99,235,0.5)",
-    opacity: "0.95",
-    transform: "translateX(-50%)",
-  });
-  gameArea.appendChild(note);
-
-  /* 🎯 노트가 정확히 타겟 막대 중앙에 닿을 타이밍 계산 */
-  const secPerBeat = 60 / Number(bpm.value);
-  const dropDuration = secPerBeat * 1.4; // 낙하속도 보정 (느릴수록 자연)
-  const travelStart = time - dropDuration;
-  const startDelay = Math.max(0, (travelStart - ctx.currentTime) * 1000);
-
-  // 애니메이션 시작
-  setTimeout(() => {
-    note.style.transition = `bottom ${dropDuration}s linear`;
-    note.style.bottom = "106px"; // 타겟 라인의 중심에 딱 닿게 설정
-  }, startDelay);
-
-  // 🎵 완전 도착 시 자동 제거
-  setTimeout(() => note.remove(), (dropDuration + 0.7) * 1000);
-
-  upcomingNotes.push({
-    time,
-    lane: laneKey,
-    el: note,
-    hit: false,
-    offbeat: isOffbeat,
-  });
-}
-
-/* 🎶 메트로놈 연동 (裏拍 기준) */
-const origSchedule = schedule;
-schedule = function () {
-  while (running && nextNoteTime < ctx.currentTime + scheduleAheadTime) {
-    clickSound(nextNoteTime, { accent: accent1.checked && beatIdx === 0 });
-
-    // 뒷박 타이밍 (앤드)
-    const half = (60 / Number(bpm.value)) / 2;
-    if (offbeatToggle.checked) {
-      offbeatSound(nextNoteTime + half);
-      if (gameMode) spawnNote(nextNoteTime + half, true); // 🎯 뒷박 생성
-    } else {
-      if (gameMode) spawnNote(nextNoteTime);
+    function createNote() {
+      const note = document.createElement('div');
+      note.classList.add('note');
+      Object.assign(note.style, {
+        position: 'absolute',
+        left: '180px',
+        width: '40px',
+        height: '20px',
+        background: '#00ffea',
+        borderRadius: '5px',
+        top: '0px'
+      });
+      game.appendChild(note);
+      notes.push(note);
     }
 
-    queueBeatUI(nextNoteTime, beatIdx);
-    rhythmAdvance(nextNoteTime);
-    nextNote();
-  }
-  timerID = setTimeout(schedule, lookahead);
-};
-
-/* 🎹 판정 로직 — 노트가 타겟라인과 겹칠 때 PERFECT */
-document.addEventListener("keydown", (e) => {
-  if (!gameMode) return;
-  const key = e.key.toUpperCase();
-  if (!lanes.includes(key)) return;
-
-  const keyEl = document.getElementById("key-" + key);
-  glowKey(keyEl, "#60a5fa");
-
-  const now = ctx.currentTime;
-  const note = upcomingNotes.find(
-    (n) => !n.hit && n.lane === key && Math.abs(now - n.time) < hitWindowGood
-  );
-
-  if (note) {
-    note.hit = true;
-    note.el.style.background = "#22c55e";
-    note.el.style.boxShadow = "0 0 25px rgba(34,197,94,0.9)";
-    setTimeout(() => note.el.remove(), 150);
-
-    const diff = Math.abs(now - note.time);
-    if (diff < hitWindowPerfect) {
-      judge.innerText = "PERFECT!";
-      judge.style.color = "#22c55e";
-      score += 100;
-      combo++;
-    } else {
-      judge.innerText = "GOOD!";
-      judge.style.color = "#3b82f6";
-      score += 50;
-      combo++;
+    function updateNotes() {
+      for (let i = 0; i < notes.length; i++) {
+        let n = notes[i];
+        let top = parseInt(n.style.top);
+        n.style.top = top + 5 + 'px';
+        if (top > 600) {
+          n.remove();
+          notes.splice(i, 1);
+          i--;
+        }
+      }
     }
-  } else {
-    judge.innerText = "MISS!";
-    judge.style.color = "#ef4444";
-    combo = 0;
-  }
 
-  hud.innerHTML = `🎯 SCORE: ${score}<br>🔥 COMBO: ${combo}`;
-  setTimeout(() => (judge.innerText = ""), 300);
-});
+    function checkHit() {
+      for (let i = 0; i < notes.length; i++) {
+        let n = notes[i];
+        let top = parseInt(n.style.top);
+        if (top > 470 && top < 530) {
+          score += 100;
+          scoreLabel.textContent = 'Score: ' + score;
+          n.remove();
+          notes.splice(i, 1);
+          break;
+        }
+      }
+    }
 
-/* 🎮 버튼 */
-const gameBtn = document.createElement("button");
-gameBtn.textContent = "🎮 リズム게임 시작";
-gameBtn.className = "btn-primary";
-gameBtn.style.marginTop = "16px";
-document.querySelector(".card").appendChild(gameBtn);
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && running) {
+        checkHit();
+      }
+    });
 
-gameBtn.addEventListener("click", () => {
-  ensureAudio();
-  if (!gameMode) {
-    score = 0;
-    combo = 0;
-    gameMode = true;
-    gameArea.style.display = "block";
-    gameBtn.textContent = "🛑 ゲーム 종료";
-    start(false);
-  } else {
-    gameMode = false;
-    stop();
-    upcomingNotes.forEach((n) => n.el.remove());
-    upcomingNotes = [];
-    gameArea.style.display = "none";
-    gameBtn.textContent = "🎮 リズム게임 시작";
-  }
-});
-</script>
-
-
-
-
+    startBtn.addEventListener('click', () => {
+      if (!running) {
+        running = true;
+        score = 0;
+        scoreLabel.textContent = 'Score: 0';
+        startBtn.textContent = '■ ストップ';
+        createTimer = setInterval(createNote, 1000);
+        moveTimer = setInterval(updateNotes, 30);
+      } else {
+        running = false;
+        clearInterval(createTimer);
+        clearInterval(moveTimer);
+        notes.forEach(n => n.remove());
+        notes = [];
+        startBtn.textContent = '▶ スタート';
+      }
+    });
+  </script>
 </body>
 </html>
