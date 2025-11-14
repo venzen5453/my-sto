@@ -3,11 +3,216 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>裏拍メトロノーム — Ultra Premium Web Edition</title>
+<title>裏拍メトロノーム —</title>
 
 <!-- ===== Part 2에서 CSS가 이어집니다 ===== -->
 
 </head>
+<style>
+:root{
+  --bg:#f7fbff; 
+  --card:#ffffff; 
+  --text:#0f172a; 
+  --muted:#475569; 
+  --line:#e5eaf1;
+  --primary:#2563eb; 
+  --accent:#22c55e; 
+  --accent2:#0ea5e9; 
+  --danger:#ef4444;
+
+  --bar-bg:#cbd5e1;
+  --dot:#cbd5e1;
+  --dot-active:#2563eb;
+}
+.dark{
+  --bg:#0f172a; 
+  --card:#1e293b; 
+  --text:#f1f5f9; 
+  --muted:#94a3b8; 
+  --line:#334155;
+
+  --primary:#3b82f6; 
+  --accent:#4ade80; 
+  --accent2:#38bdf8; 
+  --danger:#ef4444;
+
+  --bar-bg:#475569;
+  --dot:#475569;
+  --dot-active:#3b82f6;
+}
+*{
+  box-sizing:border-box;
+  transition:background .15s, color .15s, border .15s;
+}
+body{
+  margin:0; padding:20px;
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
+  background:var(--bg); color:var(--text);
+}
+.wrap{
+  width:min(1080px,94vw);
+  margin:0 auto;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.07);
+  padding:22px;
+}
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+  margin-top:18px;
+}
+.row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:12px 0;
+}
+label{
+  min-width:80px;
+  color:var(--muted);
+}
+input[type="range"]{
+  flex:1;
+}
+input[type="number"], select{
+  padding:6px 8px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
+}
+button{
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid transparent;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-primary{
+  background:var(--primary);
+  color:#fff;
+}
+.btn-secondary{
+  background:#e9edf3;
+  border:1px solid #d0d5dd;
+  color:var(--text);
+}
+.btn-danger{
+  background:var(--danger);
+  color:#fff;
+  border:none;
+}
+
+/* Pulse */
+#pulse{
+  width:46px;height:46px;
+  border-radius:50%;
+  background:var(--primary);
+  margin:0 auto 12px auto;
+  opacity:.35;
+  transition:transform .12s, opacity .12s;
+}
+
+/* Beat Grid */
+.beatGrid{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
+.beatDot{
+  width:16px;height:16px;
+  border-radius:50%;
+  background:var(--dot);
+  transition:.15s;
+}
+.beatDot.active{
+  background:var(--dot-active);
+  box-shadow:0 0 10px var(--primary);
+}
+
+/* Progress Bar */
+.meter{
+  height:12px;
+  border-radius:8px;
+  background:var(--bar-bg);
+  overflow:hidden;
+  border:1px solid var(--line);
+}
+.bar{
+  height:100%; width:0%;
+  background:linear-gradient(90deg,var(--accent2),var(--accent),#86efac);
+  transition:width .1s linear;
+}
+
+/* Offbeat Lamp */
+#offbeatLamp{
+  transition:background .15s, box-shadow .15s;
+}
+
+/* Pattern Buttons */
+.patternBtn{
+  width:28px; height:28px;
+  background:#e2e8f0;
+  border-radius:6px;
+  border:1px solid var(--line);
+  cursor:pointer;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+}
+.patternBtn.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+  box-shadow:0 0 8px var(--primary);
+}
+
+/* Visualizer - Sweep Mode */
+#sweepCanvas{
+  width:100%; 
+  height:120px;
+  background:#00000010;
+  display:none;
+  border-radius:8px;
+}
+
+/* Visualizer - Bars */
+#barsArea{
+  display:none;
+  margin-top:10px;
+}
+.barBeat{
+  height:10px;
+  width:100%;
+  background:#94a3b8;
+  margin:6px 0;
+  border-radius:6px;
+  transition:.15s;
+}
+.barBeat.active{
+  background:var(--primary);
+  box-shadow:0 0 10px var(--primary);
+}
+
+/* History Area */
+#historyArea{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px;
+  margin-top:10px;
+  max-height:200px;
+  overflow:auto;
+}
+</style>
 
 <body>
 <div class="wrap">
@@ -227,6 +432,743 @@
 </div></div>
 
 <!-- ===== Part 3, 4, 5에서 JavaScript가 이어집니다 ===== -->
+
+  <script>
+// ============
+// Audio Setup
+// ============
+let ctx = null, masterGain = null;
+
+function ensureAudio() {
+  if (ctx) return;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = ctx.createGain();
+  masterGain.gain.value = parseFloat(vol.value);
+  masterGain.connect(ctx.destination);
+}
+
+// ============
+// Click Sounds
+// ============
+function playClick(time, type="accent") {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  let freq = 1000;
+
+  if (type === "accent") freq = 1500;
+  if (type === "subdiv") freq = 800;
+
+  if (soundType.value === "snare") freq = 1800;
+  if (soundType.value === "hihat") freq = 3500;
+  if (soundType.value === "kick") freq = 180;
+
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(1.0, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.07);
+
+  osc.connect(gain);
+  gain.connect(masterGain);
+
+  osc.start(time);
+  osc.stop(time + 0.08);
+}
+
+// Offbeat sound
+function playOffbeat(time) {
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.frequency.value = 900;
+  g.gain.setValueAtTime(0.6, time);
+  g.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(time); osc.stop(time + 0.06);
+}
+
+// ============
+// UI Elements
+// ============
+const bar       = document.getElementById("bar");
+const beatNow   = document.getElementById("beatNow");
+const pulse     = document.getElementById("pulse");
+const offbeatLamp = document.getElementById("offbeatLamp");
+const beatGrid  = document.getElementById("beatGrid");
+const customPatternArea = document.getElementById("customPatternArea");
+const patternButtons = document.getElementById("patternButtons");
+
+// ===== Beat Grid Dots =====
+function updateBeatGrid(count) {
+  beatGrid.innerHTML = "";
+  for (let i=0; i<count; i++) {
+    const dot = document.createElement("div");
+    dot.className = "beatDot";
+    beatGrid.appendChild(dot);
+  }
+}
+updateBeatGrid(4);
+
+// ============
+// State
+// ============
+let nextTime = 0;
+let running = false;
+let beatIndex = 0;
+let timerID;
+
+let customPattern = []; // e.g. [true,false,false,true]
+
+// ============
+// Pattern Maker
+// ============
+function buildCustomPatternUI() {
+  patternButtons.innerHTML = "";
+  const n = Number(beats.value);
+  customPattern = new Array(n).fill(false);
+
+  for (let i=0; i<n; i++) {
+    const b = document.createElement("div");
+    b.className = "patternBtn";
+    b.textContent = i+1;
+    b.dataset.index = i;
+
+    b.onclick = () => {
+      const idx = Number(b.dataset.index);
+      customPattern[idx] = !customPattern[idx];
+      b.classList.toggle("active", customPattern[idx]);
+    };
+
+    patternButtons.appendChild(b);
+  }
+}
+
+// ============
+// Count-In
+// ============
+function scheduleCountIn() {
+  const interval = 60 / Number(bpm.value);
+  let t = ctx.currentTime + 0.1;
+  for (let i=0; i<4; i++) {
+    playClick(t, "accent");
+    t += interval;
+  }
+  return t; // return time when real playback starts
+}
+
+// ============
+// Visual: Pulse
+// ============
+function pulseBeat(time) {
+  const delay = Math.max(0, (time - ctx.currentTime) * 1000);
+  setTimeout(() => {
+    pulse.style.transform = "scale(1.5)";
+    pulse.style.opacity = "1";
+    setTimeout(() => {
+      pulse.style.transform = "scale(1)";
+      pulse.style.opacity = ".35";
+    }, 140);
+  }, delay);
+}
+
+// ============
+// Visual: Beat Grid
+// ============
+function activeBeatDot(time, idx) {
+  const dots = beatGrid.children;
+  const delay = Math.max(0, (time - ctx.currentTime) * 1000);
+  setTimeout(() => {
+    [...dots].forEach((d,i)=>d.classList.toggle("active", i===idx));
+  }, delay);
+}
+
+// Offbeat lamp pulse
+function flashOffbeat(time) {
+  const d = Math.max(0,(time-ctx.currentTime)*1000);
+  setTimeout(()=>{
+    offbeatLamp.style.background = "#22c55e";
+    offbeatLamp.style.boxShadow = "0 0 14px #22c55e";
+    setTimeout(()=>{
+      offbeatLamp.style.background = "#ccc";
+      offbeatLamp.style.boxShadow = "0 0 6px rgba(0,0,0,.2)";
+    }, 140);
+  }, d);
+}
+
+// ============
+// Subdivision Scheduler
+// ============
+function scheduleSubdivision(time, interval, subdiv) {
+  if (subdiv <= 1) return;
+  const swingOn = swingToggle.checked && subdiv === 2;
+
+  for (let i=1; i<subdiv; i++) {
+    let t2;
+
+    if (swingOn) {
+      const ratio = 0.66;
+      if (i === 1) t2 = time + interval * ratio;
+      if (i === 2) t2 = time + interval * (ratio + (1-ratio));
+    } else {
+      t2 = time + interval * i;
+    }
+    playClick(t2, "subdiv");
+  }
+}
+
+// ============
+// Pattern Check
+// ============
+function isStrongBeat(i) {
+  const b = Number(beats.value);
+  const mode = patternSelect.value;
+
+  if (mode === "default") {
+    return i === 0;
+  }
+  if (mode === "rock") {
+    return i === 0 || i === 2;
+  }
+  if (mode === "backbeat") {
+    return i === 1 || i === 3;
+  }
+  if (mode === "clave") {
+    const pattern = [true,false,false,true,false,true,false,false];
+    return pattern[i % 8];
+  }
+  if (mode === "custom") {
+    return !!customPattern[i];
+  }
+  return i===0;
+}
+
+// ============
+// Poly Rhythm
+// ============
+function schedulePoly(time) {
+  const A = Number(polyA.value);
+  const B = Number(polyB.value);
+  if (!A || !B) return;
+
+  const interval = 60 / Number(bpm.value);
+  const polyIntervalA = interval / A;
+  const polyIntervalB = interval / B;
+
+  for (let i=0; i<A; i++) playClick(time + polyIntervalA * i, "subdiv");
+  for (let j=0; j<B; j++) playClick(time + polyIntervalB * j, "subdiv");
+}
+
+// ============
+// Loop Training
+// ============
+let loopCounter = 0;
+let loopPlaying = true;
+
+function handleLoop() {
+  const mode = loopMode.value;
+  if (mode === "none") return;
+
+  if (mode === "2-4") {
+    if (loopCounter < 2) loopPlaying = true;
+    else if (loopCounter < 6) loopPlaying = false;
+    else loopCounter = -1;
+  }
+  if (mode === "4-4") {
+    if (loopCounter < 4) loopPlaying = true;
+    else if (loopCounter < 8) loopPlaying = false;
+    else loopCounter = -1;
+  }
+  if (mode === "custom") {
+    const on = Number(loopOn.value);
+    const off = Number(loopOff.value);
+    if (loopCounter < on) loopPlaying = true;
+    else if (loopCounter < on + off) loopPlaying = false;
+    else loopCounter = -1;
+  }
+}
+
+// ============
+// Auto BPM / Curve
+// ============
+function applyBpmCurve() {
+  if (bpmCurve.value === "accel") {
+    bpm.value = Number(bpm.value) + 0.03;
+  }
+  if (bpmCurve.value === "rit") {
+    bpm.value = Number(bpm.value) - 0.03;
+  }
+  bpmNum.value = bpm.value;
+}
+
+// Auto BPM UP
+function applyAutoBpm() {
+  if (!autoBpm.checked) return;
+  if (beatIndex === 0) {
+    bpm.value = Number(bpm.value) + Number(autoStep.value);
+    bpmNum.value = bpm.value;
+  }
+}
+
+// Session Timer
+let sessionRemain = 0;
+let sessionTimerID;
+
+function startSessionTimer() {
+  sessionRemain = Number(sessionTimer.value);
+  if (sessionRemain > 0) {
+    sessionTimerID = setInterval(() => {
+      sessionRemain--;
+      if (sessionRemain <= 0) stopMetronome();
+    }, 1000);
+  }
+}
+
+// ============
+// Main Scheduler
+// ============
+function scheduleNotes() {
+  const bpmVal = Number(bpm.value);
+  const interval = 60 / bpmVal;
+  const subdiv = Number(subdiv.value);
+
+  while (running && nextTime < ctx.currentTime + 0.15) {
+    handleLoop();
+
+    if (loopPlaying) {
+      if (isStrongBeat(beatIndex)) playClick(nextTime, "accent");
+      else playClick(nextTime, "beat");
+    }
+
+    scheduleSubdivision(nextTime, interval / subdiv, subdiv);
+    schedulePoly(nextTime);
+
+    if (offbeatToggle.checked) {
+      flashOffbeat(nextTime + interval/2);
+      playOffbeat(nextTime + interval/2);
+    }
+
+    applyAutoBpm();
+    applyBpmCurve();
+
+    pulseBeat(nextTime);
+    activeBeatDot(nextTime, beatIndex);
+
+    const delay = Math.max(0,(nextTime-ctx.currentTime)*1000);
+    setTimeout(() => {
+      beatNow.textContent = beatIndex+1;
+      const pct = ((beatIndex+1)/Number(beatsNum.value))*100;
+      bar.style.width = pct + "%";
+      if (pct>=99) setTimeout(()=> bar.style.width = "0%", 80);
+    }, delay);
+
+    nextTime += interval;
+    beatIndex = (beatIndex + 1) % Number(beats.value);
+    loopCounter++;
+  }
+
+  timerID = setTimeout(scheduleNotes, 25);
+}
+
+// ============
+// START
+// ============
+function startMetronome() {
+  ensureAudio();
+
+  if (ctx.state === "suspended") ctx.resume();
+
+  running = true;
+  beatIndex = 0;
+  loopCounter = 0;
+  loopPlaying = true;
+
+  updateBeatGrid(Number(beats.value));
+
+  let startAt = ctx.currentTime + 0.1;
+
+  if (countInToggle.checked) {
+    startAt = scheduleCountIn();
+  }
+
+  nextTime = startAt;
+  scheduleNotes();
+
+  playToggle.textContent = "■ ストップ";
+  startSessionTimer();
+}
+
+// ============
+// STOP
+// ============
+function stopMetronome() {
+  running = false;
+  clearTimeout(timerID);
+  clearInterval(sessionTimerID);
+
+  beatNow.textContent = "–";
+  bar.style.width = "0%";
+
+  playToggle.textContent = "▶ スタート";
+}
+
+// Panic
+function panic() {
+  stopMetronome();
+  if (ctx) {
+    ctx.close();
+    ctx = null;
+    masterGain = null;
+  }
+}
+
+playToggle.onclick = () => running ? stopMetronome() : startMetronome();
+panicBtn.onclick = panic;
+
+// ============
+// LocalStorage Save
+// ============
+function saveSettings() {
+  const data = {
+    bpm:bpm.value,
+    beats:beats.value,
+    vol:vol.value,
+    subdiv:subdiv.value,
+    swing:swingToggle.checked,
+    offbeat:offbeatToggle.checked,
+    sound:soundType.value,
+    visual:visualMode.value
+  };
+  localStorage.setItem("metSettings", JSON.stringify(data));
+}
+
+[bpm,beats,vol,subdiv,swingToggle,offbeatToggle,soundType,visualMode]
+  .forEach(el => el.addEventListener("change", saveSettings));
+
+// Load
+(function(){
+  const s = JSON.parse(localStorage.getItem("metSettings")||"null");
+  if (!s) return;
+  bpm.value = bpmNum.value = s.bpm;
+  beats.value = beatsNum.value = s.beats;
+  vol.value = volNum.value = s.vol;
+  subdiv.value = s.subdiv;
+  swingToggle.checked = s.swing;
+  offbeatToggle.checked = s.offbeat;
+  soundType.value = s.sound;
+  visualMode.value = s.visual;
+})();
+</script>
+
+  <script>
+/* ===========================================================
+   PART 4 — Tap Tempo / Presets / Accuracy / WAV Export / Visualizer
+   ===========================================================*/
+
+// ----------------------
+// Tap Tempo
+// ----------------------
+let tapTimes = [];
+tapBtn.onclick = () => {
+  const now = performance.now();
+  tapTimes.push(now);
+
+  // 5개 이상은 앞을 버림
+  if (tapTimes.length > 5) tapTimes.shift();
+
+  if (tapTimes.length >= 2) {
+    const intervals = [];
+    for (let i=1; i<tapTimes.length; i++) {
+      intervals.push(tapTimes[i] - tapTimes[i-1]);
+    }
+    const avg = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+    const bpmTap = Math.round(60000 / avg);
+
+    bpm.value = bpmNum.value = bpmTap;
+  }
+};
+
+// ----------------------
+// Preset Save / Load
+// ----------------------
+function savePreset() {
+  const p = {
+    bpm:bpm.value,
+    beats:beats.value,
+    vol:vol.value,
+    subdiv:subdiv.value,
+    swing:swingToggle.checked,
+    offbeat:offbeatToggle.checked,
+    sound:soundType.value,
+    visual:visualMode.value,
+    pattern:customPattern,
+  };
+  const name = prompt("プリセット名を入力してください");
+  if (!name) return;
+
+  localStorage.setItem("preset_"+name, JSON.stringify(p));
+
+  const opt = document.createElement("option");
+  opt.value = "preset_"+name;
+  opt.textContent = name;
+  presetList.appendChild(opt);
+}
+
+presetSave.onclick = savePreset;
+
+presetLoad.onclick = () => {
+  const key = presetList.value;
+  if (key === "0") return;
+
+  const p = JSON.parse(localStorage.getItem(key)||"null");
+  if (!p) return;
+
+  bpm.value = bpmNum.value = p.bpm;
+  beats.value = beatsNum.value = p.beats;
+  vol.value = volNum.value = p.vol;
+  subdiv.value = p.subdiv;
+  swingToggle.checked = p.swing;
+  offbeatToggle.checked = p.offbeat;
+  soundType.value = p.sound;
+  visualMode.value = p.visual;
+
+  customPattern = p.pattern;
+  if (patternSelect.value === "custom") buildCustomPatternUI();
+
+  saveSettings();
+};
+
+// ----------------------
+// 리듬 정확도 측정
+// ----------------------
+let accuracyActive = false;
+let accuracyData = [];
+
+accuracyStart.onclick = () => {
+  accuracyActive = true;
+  accuracyData = [];
+  accuracyResult.textContent = "計測中… Spaceキーで拍に合わせてください";
+};
+
+accuracyReset.onclick = () => {
+  accuracyActive = false;
+  accuracyData = [];
+  accuracyResult.textContent = "（Space キーで測定）";
+};
+
+// Space 입력 감지함
+document.addEventListener("keydown", (e)=>{
+  if (e.code !== "Space") return;
+  if (!accuracyActive) return;
+
+  const t = ctx ? ctx.currentTime : 0;
+  // 예정된 박자와 가장 가까운 박자 찾기
+  const interval = 60 / Number(bpm.value);
+
+  // 전체 박자 인덱스 추정
+  const idx = Math.round((t - nextTime) / interval);
+  const nearestBeatTime = nextTime + idx * interval;
+
+  const diffMs = (t - nearestBeatTime) * 1000;
+  accuracyData.push(diffMs);
+
+  const avg = accuracyData.reduce((a,b)=>a+b,0)/accuracyData.length;
+  const absAvg = Math.abs(avg);
+
+  accuracyResult.textContent =
+    `${accuracyData.length} 回計測 — 平均誤差: ${avg.toFixed(1)}ms（絶対: ${absAvg.toFixed(1)}ms）`;
+});
+
+// ----------------------
+// Visualizer — Sweep Mode
+// ----------------------
+let sweepCanvas = null;
+let sweepCtx = null;
+
+function initSweep() {
+  if (sweepCanvas) return;
+  sweepCanvas = document.createElement("canvas");
+  sweepCanvas.id = "sweepCanvas";
+  document.querySelector(".panel").appendChild(sweepCanvas);
+
+  sweepCtx = sweepCanvas.getContext("2d");
+
+  function resize() {
+    sweepCanvas.width = sweepCanvas.clientWidth;
+    sweepCanvas.height = sweepCanvas.clientHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+}
+
+function drawSweep(time) {
+  if (visualMode.value !== "sweep") return;
+  if (!sweepCanvas) return;
+
+  const delay = Math.max(0,(time-ctx.currentTime)*1000);
+  setTimeout(()=>{
+    const w = sweepCanvas.width;
+    const h = sweepCanvas.height;
+
+    sweepCtx.fillStyle = "rgba(0,0,0,0.15)";
+    sweepCtx.fillRect(0,0,w,h);
+
+    sweepCtx.fillStyle = "#3b82f6";
+    const x = Math.random()*w;
+    sweepCtx.fillRect(x,0,4,h);
+
+  },delay);
+}
+
+// ----------------------
+// Visualizer — Bars Mode
+// ----------------------
+function initBars() {
+  let barsArea = document.getElementById("barsArea");
+  if (!barsArea) {
+    barsArea = document.createElement("div");
+    barsArea.id = "barsArea";
+    document.querySelector(".panel").appendChild(barsArea);
+  }
+  barsArea.innerHTML = "";
+
+  for (let i=0;i<Number(beats.value);i++){
+    const b = document.createElement("div");
+    b.className = "barBeat";
+    barsArea.appendChild(b);
+  }
+}
+
+function triggerBars(time, idx){
+  if (visualMode.value!=="bars") return;
+  const barsArea = document.getElementById("barsArea");
+  if (!barsArea) return;
+
+  const bars = barsArea.children;
+  const d = Math.max(0,(time-ctx.currentTime)*1000);
+
+  setTimeout(()=>{
+    [...bars].forEach((b,i)=>b.classList.toggle("active", i===idx));
+  },d);
+}
+
+// ----------------------
+// Visual Mode Handler
+// ----------------------
+visualMode.onchange = ()=>{
+  if (visualMode.value==="sweep") {
+    initSweep();
+    document.getElementById("sweepCanvas").style.display="block";
+    document.getElementById("barsArea").style.display="none";
+  }
+  else if (visualMode.value==="bars") {
+    initBars();
+    document.getElementById("sweepCanvas")?.style.display="none";
+    document.getElementById("barsArea").style.display="block";
+  }
+  else {
+    document.getElementById("sweepCanvas")?.style.display="none";
+    document.getElementById("barsArea")?.style.display="none";
+  }
+};
+
+// ----------------------
+// WAV Export (Click Track)
+// ----------------------
+exportWav.onclick = async ()=>{
+  if (!ctx) ensureAudio();
+
+  const bpmVal = Number(bpm.value);
+  const interval = 60/bpmVal;
+  const totalBeats = 16; // 4마디
+
+  const sampleRate = 44100;
+  const length = Math.ceil(sampleRate * interval * totalBeats);
+  const buffer = new Float32Array(length);
+
+  for (let i=0;i<totalBeats;i++){
+    const t = i * interval;
+    const idx = Math.floor(t * sampleRate);
+
+    // 간단한 click 파형
+    for (let j=0;j<100;j++){
+      if (idx+j < length){
+        buffer[idx+j] += (strongBeat(i)?1:-0.5) * Math.exp(-j/40);
+      }
+    }
+  }
+
+  const wav = encodeWAV(buffer, sampleRate);
+
+  const blob = new Blob([wav],{type:"audio/wav"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href=url;
+  a.download="clicktrack.wav";
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  function strongBeat(i){ return i%Number(beats.value)===0; }
+};
+
+// WAV 인코더
+function encodeWAV(samples, sampleRate) {
+  const buffer = new ArrayBuffer(44 + samples.length*2);
+  const view = new DataView(buffer);
+
+  function writeStr(offset, str){
+    for (let i=0;i<str.length;i++){
+      view.setUint8(offset+i, str.charCodeAt(i));
+    }
+  }
+
+  writeStr(0,"RIFF");
+  view.setUint32(4,36 + samples.length*2,true);
+  writeStr(8,"WAVE");
+  writeStr(12,"fmt ");
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*2,true);
+  view.setUint16(32,2,true);
+  view.setUint16(34,16,true);
+
+  writeStr(36,"data");
+  view.setUint32(40,samples.length*2,true);
+
+  let offset=44;
+  for (let i=0;i<samples.length;i++){
+    let s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s*0x7fff, true);
+    offset+=2;
+  }
+  return buffer;
+}
+
+// ----------------------
+// Practice History
+// ----------------------
+showHistory.onclick = () => {
+  const h = JSON.parse(localStorage.getItem("practiceHistory")||"[]");
+  const area = document.getElementById("historyArea");
+  area.style.display = area.style.display==="none" ? "block":"none";
+
+  area.innerHTML = h.map(item =>
+    `<div>${item.time} — BPM:${item.bpm}, ${item.min}分練習</div>`
+  ).join("");
+};
+
+function logPractice(){
+  const h = JSON.parse(localStorage.getItem("practiceHistory")||"[]");
+
+  h.push({
+    time:new Date().toLocaleString(),
+    bpm:Number(bpm.value),
+    min:Number(sessionTimer.value)/60
+  });
+
+  localStorage.setItem("practiceHistory", JSON.stringify(h));
+}
+</script>
 
 </body>
 </html>
