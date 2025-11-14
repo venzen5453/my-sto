@@ -1170,5 +1170,178 @@ function logPractice(){
 }
 </script>
 
+  <script>
+/* ===========================================================
+   PART 5 — Final Integration / Dark Mode / UI Binding / Init
+   ===========================================================*/
+
+// -----------------------------
+// ダークモード
+// -----------------------------
+themeToggle.onclick = () => {
+  document.body.classList.toggle("dark");
+  themeToggle.textContent =
+    document.body.classList.contains("dark")
+      ? "☀ ライトモード"
+      : "🌙 ダークモード";
+};
+
+// -----------------------------
+// 拍子 변경 시 커스텀 패턴 UI 업데이트
+// -----------------------------
+beats.oninput = () => {
+  beatsNum.value = beats.value;
+  updateBeatGrid(Number(beats.value));
+
+  if (patternSelect.value === "custom") {
+    buildCustomPatternUI();
+  }
+
+  if (visualMode.value === "bars") {
+    initBars();
+  }
+};
+beatsNum.oninput = () => {
+  beats.value = beatsNum.value;
+  updateBeatGrid(Number(beats.value));
+
+  if (patternSelect.value === "custom") {
+    buildCustomPatternUI();
+  }
+
+  if (visualMode.value === "bars") {
+    initBars();
+  }
+};
+
+// -----------------------------
+// Volume sync
+// -----------------------------
+vol.oninput = ()=>{ volNum.value = vol.value; masterGain && (masterGain.gain.value=vol.value); };
+volNum.oninput = ()=>{ vol.value = volNum.value; masterGain && (masterGain.gain.value=vol.value); };
+
+// -----------------------------
+// BPM sync
+// -----------------------------
+bpm.oninput = ()=> bpmNum.value = bpm.value;
+bpmNum.oninput = ()=> bpm.value = bpmNum.value;
+
+// -----------------------------
+// 패턴 선택 시 UI 표시
+// -----------------------------
+patternSelect.onchange = ()=>{
+  if (patternSelect.value === "custom") {
+    customPatternArea.style.display = "block";
+    buildCustomPatternUI();
+  } else {
+    customPatternArea.style.display = "none";
+  }
+};
+
+// -----------------------------
+// Loop UI
+// -----------------------------
+loopMode.onchange = ()=>{
+  if (loopMode.value === "custom") {
+    customLoopArea.style.display = "block";
+  } else {
+    customLoopArea.style.display = "none";
+  }
+};
+
+// -----------------------------
+// Visualizer 초기화
+// -----------------------------
+visualMode.onchange = ()=>{
+  if (visualMode.value === "pulse") {
+    pulse.style.display = "block";
+    document.getElementById("sweepCanvas")?.style.setProperty("display","none");
+    document.getElementById("barsArea")?.style.setProperty("display","none");
+  }
+  else if (visualMode.value === "sweep") {
+    pulse.style.display = "none";
+    initSweep();
+    document.getElementById("sweepCanvas").style.display="block";
+    document.getElementById("barsArea")?.style.setProperty("display","none");
+  }
+  else if (visualMode.value === "bars") {
+    pulse.style.display = "none";
+    initBars();
+    document.getElementById("sweepCanvas")?.style.setProperty("display","none");
+    document.getElementById("barsArea").style.display="block";
+  }
+};
+
+// -----------------------------
+// 메트로놈 시작/정지 시 Visualizer와 History 기록 처리
+// -----------------------------
+const originalStart = startMetronome;
+const originalStop  = stopMetronome;
+
+// override
+startMetronome = function(){
+  originalStart();
+
+  // visual init
+  if (visualMode.value==="bars") initBars();
+  if (visualMode.value==="sweep") initSweep();
+};
+
+stopMetronome = function(){
+  originalStop();
+
+  // practice history 자동 저장
+  if (Number(sessionTimer.value) > 0) {
+    logPractice();
+  }
+};
+
+// -----------------------------
+// Sweep & Bars Visual Trigger hooking
+// 메트로놈 엔진에서 subdivision/beat 예약 시 이 함수들 호출됨
+// (Part 3 내부에 drawSweep, triggerBars 의해 실행)
+// -----------------------------
+
+// 메인 엔진의 pulseBeat, activeBeatDot 등을 이미 Part 3에서 호출했으므로
+// 여기서는 별도 바인딩 할 필요 없음.
+
+// -----------------------------
+// 초기 로딩 시 Preset 목록 채우기
+// -----------------------------
+(function loadPresets() {
+  for (let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    if (key.startsWith("preset_")){
+      const name = key.replace("preset_","");
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = name;
+      presetList.appendChild(opt);
+    }
+  }
+})();
+
+// -----------------------------
+// Start 시 beatGrid 생성
+// -----------------------------
+updateBeatGrid(Number(beats.value));
+
+// -----------------------------
+// Default visual mode 초기화
+// -----------------------------
+visualMode.dispatchEvent(new Event("change"));
+
+// -----------------------------
+// Extra 안정성
+// -----------------------------
+window.addEventListener("blur", ()=> {
+  // 탭 벗어나면 소리 안 깨지도록
+  if (ctx && ctx.state==="running") ctx.suspend();
+});
+window.addEventListener("focus", ()=> {
+  if (ctx && ctx.state==="suspended") ctx.resume();
+});
+</script>
+
 </body>
 </html>
