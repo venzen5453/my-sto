@@ -1,327 +1,367 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>ウェブ・メトロノーム（裏拍＋ギタートレーナー＋リズムゲーム）</title>
-  <style>
-    :root{
-      --bg:#f7fbff; --card:#ffffff; --text:#0f172a; --muted:#475569; --line:#e5eaf1;
-      --primary:#2563eb; --secondary:#64748b; --accent:#22c55e; --accent2:#0ea5e9; --danger:#ef4444;
-      --kbd-bg:#eef2ff; --kbd-bd:#c7d2fe; --chip:#e9f7ff;
-    }
-    *{box-sizing:border-box}
-    html,body{height:auto;min-height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(160deg,#f7fbff,#ffffff 40%,#f3f8ff);color:var(--text);display:block;padding:20px 10px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-    .wrap{width:min(1100px,94vw);margin:0 auto;padding:22px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(15,23,42,.08);padding:22px}
-    h1{font-size:clamp(20px,3.2vw,28px);margin:0 0 6px}
-    p.sub{margin:0 0 16px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
-    @media (max-width:960px){.grid{grid-template-columns:1fr}}
-    .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
-    .row{display:flex;align-items:center;gap:12px;margin:12px 0}
-    label{min-width:120px;color:var(--muted)}
-    input[type="range"]{width:100%}
-    input[type="number"]{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
-    .inline-help{font-size:12px;color:#64748b}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--kbd-bg);border:1px solid var(--kbd-bd);padding:5px 7px;border-radius:8px}
-    .tog{display:flex;align-items:center;gap:10px}
-    .meter{height:12px;border-radius:8px;background:#eef2f7;overflow:hidden;border:1px solid var(--line)}
-    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),#34d399,#86efac);transition:width .08s ease}
-    button{appearance:none;border:1px solid transparent;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-    .btn-primary{background:var(--primary);color:#fff}
-    .btn-secondary{background:#e9edf3;color:#0f172a;border-color:#dbe2ea}
-    .btn-ghost{background:#f4f8ff;color:#0f172a;border-color:#dbe2ea}
-    .btn-danger{background:var(--danger);color:#fff}
-    .center{display:flex;align-items:center;justify-content:center}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>裏拍メトロノーム＋リズムゲーム（完全版）</title>
+<style>
+:root{
+  --bg:#f7fbff; --card:#ffffff; --text:#0f172a; --muted:#475569; --line:#e5eaf1;
+  --primary:#2563eb; --accent:#22c55e; --accent2:#0ea5e9; --danger:#ef4444;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  background:linear-gradient(160deg,#f7fbff,#ffffff 40%,#f3f8ff);
+  color:var(--text);padding:20px;
+}
+.wrap{width:min(1080px,94vw);margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 10px 30px rgba(15,23,42,.08);padding:22px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.row{display:flex;align-items:center;gap:12px;margin:12px 0}
+input[type="range"]{width:100%}
+input[type="number"]{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+button{padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-secondary{background:#e9edf3;border:1px solid #dbe2ea}
+.kbd{background:#eef2ff;border:1px solid #c7d2fe;padding:4px 7px;border-radius:8px}
+.meter{height:12px;border-radius:8px;background:#eef2f7;overflow:hidden;
+  border:1px solid var(--line)}
+.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),#34d399,#86efac);
+  transition:width .08s ease}
+#pulse{
+  width:42px;height:42px;border-radius:50%;
+  background:#2563eb;margin:12px auto;opacity:.4;
+  transition:transform .12s, opacity .12s;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>ウェブ・メトロノーム <span class="chip">裏拍インジケーター付き</span></h1>
+<div class="wrap">
+<div class="card">
 
-      <div class="panel">
-        <div class="row nowrap">
-          <label for="bpm">テンポ（BPM）</label>
-          <input id="bpm" type="range" min="30" max="240" value="100">
-          <input id="bpmNum" type="number" min="30" max="240" value="100">
-        </div>
-        <div class="row nowrap">
-          <label for="beats">拍子（分子）</label>
-          <input id="beats" type="range" min="1" max="12" value="4">
-          <input id="beatsNum" type="number" min="1" max="12" value="4">
-        </div>
-        <div class="row nowrap">
-          <label for="vol">音量</label>
-          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7">
-          <input id="volNum" type="number" min="0" max="1" step="0.01" value="0.7">
-        </div>
-        <div class="row tog"><input id="offbeatToggle" type="checkbox" checked><label for="offbeatToggle">裏拍を鳴らす</label></div>
-        <button id="playToggle" class="btn-primary">▶ スタート</button>
-        <button id="panicBtn" class="btn-danger">■ 停止</button>
+<h1>裏拍メトロノーム（完全版）</h1>
 
-        <div class="row" style="margin-top:10px">
-          <label>進行</label>
-          <div class="meter" style="flex:1"><div id="bar" class="bar"></div></div>
-          <span id="beatNow" class="kbd">–</span>
-        </div>
-
-        <!-- 👇 추가된 부분：裏拍インジケーター -->
-        <div class="center" style="margin-top:8px;">
-          <div id="offbeatLamp" style="
-            width:20px;
-            height:20px;
-            border-radius:50%;
-            background:#ccc;
-            box-shadow:0 0 8px rgba(0,0,0,0.1);
-            transition:background 0.1s, box-shadow 0.1s;">
-          </div>
-          <span class="inline-help" style="margin-left:8px;">裏拍インジケーター</span>
-        </div>
-      </div>
-    </div>
+<div class="panel">
+  <div class="row">
+    <label>BPM</label>
+    <input id="bpm" type="range" min="30" max="240" value="100">
+    <input id="bpmNum" type="number" min="30" max="240" value="100">
   </div>
 
-  <script>
-    let ctx, masterGain;
-    function ensureAudio(){
-      if(ctx) return;
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      masterGain = ctx.createGain();
-      masterGain.gain.value = parseFloat(vol.value);
-      masterGain.connect(ctx.destination);
-    }
+  <div class="row">
+    <label>拍子（分子）</label>
+    <input id="beats" type="range" min="1" max="12" value="4">
+    <input id="beatsNum" type="number" min="1" max="12" value="4">
+  </div>
 
-    function clickSound(time, accent=false){
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = accent ? 1760 : 1320;
-      g.gain.setValueAtTime(accent ? 0.8 : 0.5, time);
-      g.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(time); osc.stop(time + 0.06);
-    }
+  <div class="row">
+    <label>音量</label>
+    <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7">
+    <input id="volNum" type="number" min="0" max="1" step="0.01" value="0.7">
+  </div>
 
-    function offbeatSound(time){
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = 880;
-      g.gain.setValueAtTime(0.5, time);
-      g.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(time); osc.stop(time + 0.06);
-    }
+  <div class="row">
+    <label>細分化</label>
+    <select id="subdiv">
+      <option value="1">なし</option>
+      <option value="2">8分（2分割）</option>
+      <option value="3">3連符</option>
+      <option value="4">16分（4分割）</option>
+    </select>
+  </div>
 
-    // 💡裏拍ランプ点灯 함수
-    function flashOffbeatLamp(time) {
-      const delay = Math.max(0, (time - ctx.currentTime) * 1000);
-      setTimeout(() => {
-        offbeatLamp.style.background = '#22c55e';
-        offbeatLamp.style.boxShadow = '0 0 16px #22c55e';
-        setTimeout(() => {
-          offbeatLamp.style.background = '#ccc';
-          offbeatLamp.style.boxShadow = '0 0 8px rgba(0,0,0,0.1)';
-        }, 150);
-      }, delay);
-    }
+  <div class="row">
+    <input id="swingToggle" type="checkbox">
+    <label for="swingToggle">スウィング（Shuffle）</label>
+  </div>
 
-    const bpm = document.getElementById('bpm');
-    const bpmNum = document.getElementById('bpmNum');
-    const beats = document.getElementById('beats');
-    const beatsNum = document.getElementById('beatsNum');
-    const vol = document.getElementById('vol');
-    const volNum = document.getElementById('volNum');
-    const playToggle = document.getElementById('playToggle');
-    const panicBtn = document.getElementById('panicBtn');
-    const offbeatLamp = document.getElementById('offbeatLamp');
-    const offbeatToggle = document.getElementById('offbeatToggle');
-    const beatNow = document.getElementById('beatNow');
-    const bar = document.getElementById('bar');
+  <div class="row">
+    <input id="offbeatToggle" type="checkbox" checked>
+    <label>裏拍を鳴らす</label>
+  </div>
 
-    let running = false, nextNoteTime = 0, beatIdx = 0, timerID;
+  <div class="row">
+    <input id="autoBpm" type="checkbox">
+    <label>自動テンポ上昇</label>
+    <input id="autoStep" type="number" value="2" min="1" max="20" style="width:60px">
+    <span>BPMごと</span>
+  </div>
 
-    function nextNote(){
-      const spb = 60 / Number(bpm.value);
-      nextNoteTime += spb;
-      beatIdx = (beatIdx + 1) % Number(beats.value);
-    }
+  <div class="row">
+    <label>練習セッション</label>
+    <select id="sessionTimer">
+      <option value="0">なし</option>
+      <option value="60">1分</option>
+      <option value="180">3分</option>
+      <option value="300">5分</option>
+    </select>
+  </div>
 
-    function schedule(){
-      while (running && nextNoteTime < ctx.currentTime + 0.15){
-        clickSound(nextNoteTime, beatIdx===0);
-        if (offbeatToggle.checked){
-          const half = (60 / Number(bpm.value)) / 2;
-          offbeatSound(nextNoteTime + half);
-          flashOffbeatLamp(nextNoteTime + half); // ✨裏拍タイミングに光る！
-        }
-        queueBeatUI(nextNoteTime, beatIdx);
-        nextNote();
-      }
-      timerID = setTimeout(schedule, 25);
-    }
+  <button id="playToggle" class="btn-primary">▶ スタート</button>
+  <button id="panicBtn" class="btn-danger">■ 停止</button>
 
-    function queueBeatUI(time, idx){
-      const delay = Math.max(0, (time - ctx.currentTime)*1000);
-      setTimeout(()=>{
-        beatNow.textContent = idx+1;
-        const pct = ((idx+1)/Number(beats.value))*100;
-        bar.style.width = pct + '%';
-        if(pct>=99) setTimeout(()=> bar.style.width='0%', 60);
-      }, delay);
-    }
+  <div id="pulse"></div>
 
-    function start(){
-      ensureAudio();
-      if (ctx.state === 'suspended') ctx.resume();
-      if (running) return;
-      running = true;
-      beatIdx = Number(beats.value)-1;
-      nextNoteTime = ctx.currentTime + 0.1;
-      schedule();
-      playToggle.textContent = '■ ストップ';
-    }
+  <div class="row">
+    <label>進行</label>
+    <div class="meter" style="flex:1"><div id="bar" class="bar"></div></div>
+    <span id="beatNow" class="kbd">–</span>
+  </div>
 
-    function stop(){
-      running = false;
-      clearTimeout(timerID);
-      beatNow.textContent = '–';
-      bar.style.width = '0%';
-      playToggle.textContent = '▶ スタート';
-    }
+  <div class="center" style="text-align:center;margin-top:10px">
+    <div id="offbeatLamp" style="
+      width:22px;height:22px;border-radius:50%;background:#ccc;
+      box-shadow:0 0 8px rgba(0,0,0,0.15);transition:.1s;">
+    </div>
+    <div style="margin-left:8px;color:#64748b">裏拍インジケーター</div>
+  </div>
 
-    function panic(){
-      stop();
-      if(ctx){ ctx.close(); ctx = null; masterGain = null; }
-    }
+</div>
 
-    playToggle.addEventListener('click', ()=> running ? stop() : start());
-    panicBtn.addEventListener('click', panic);
-  </script>
+<!-- ───────────── リズムゲーム ───────────── -->
+<div class="panel" style="margin-top:30px;text-align:center">
+<h2>🎮 シンプル・リズムゲーム</h2>
 
-  <!-- 🎮 간단 리듬게임 -->
-  <script>
-    const gameContainer = document.createElement('div');
-    gameContainer.style.marginTop = '40px';
-    gameContainer.style.textAlign = 'center';
-    document.querySelector('.card').appendChild(gameContainer);
+<div id="game" style="
+  position:relative;width:400px;height:600px;margin:0 auto;
+  background:#222;border:3px solid #555;overflow:hidden;border-radius:20px">
+</div>
 
-    const title = document.createElement('h2');
-    title.textContent = '🎮 シンプル・リズムゲーム';
-    gameContainer.appendChild(title);
+<div id="scoreLabel" style="font-size:20px;font-weight:bold;margin:12px 0">Score: 0</div>
 
-    const game = document.createElement('div');
-    game.id = 'rhythmGame';
-    Object.assign(game.style, {
-      position: 'relative',
-      width: '400px',
-      height: '600px',
-      margin: '0 auto',
-      background: '#222',
-      border: '3px solid #555',
-      overflow: 'hidden',
-      borderRadius: '20px'
-    });
-    gameContainer.appendChild(game);
+<button id="gameStart" class="btn-primary">▶ スタート</button>
 
-    const line = document.createElement('div');
-    Object.assign(line.style, {
-      position: 'absolute',
-      bottom: '100px',
-      left: '0',
-      width: '100%',
-      height: '4px',
-      background: '#ff0077'
-    });
-    game.appendChild(line);
+</div>
 
-    const scoreLabel = document.createElement('div');
-    scoreLabel.textContent = 'Score: 0';
-    Object.assign(scoreLabel.style, {
-      color: '#222',
-      fontSize: '22px',
-      fontWeight: 'bold',
-      marginTop: '10px'
-    });
-    gameContainer.appendChild(scoreLabel);
+</div>
+</div>
 
-    const startBtn = document.createElement('button');
-    startBtn.textContent = '▶ スタート';
-    Object.assign(startBtn.style, {
-      background: '#2563eb',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '10px',
-      padding: '10px 20px',
-      fontSize: '16px',
-      cursor: 'pointer'
-    });
-    gameContainer.appendChild(startBtn);
+<script>
+let ctx, gain;
+function audioInit(){
+  if(ctx) return;
+  ctx = new (window.AudioContext||window.webkitAudioContext)();
+  gain = ctx.createGain();
+  gain.gain.value = parseFloat(vol.value);
+  gain.connect(ctx.destination);
+}
+function clickSound(time,accent=false){
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = accent?1760:1320;
+  g.gain.setValueAtTime(accent?.8:.5,time);
+  g.gain.exponentialRampToValueAtTime(.001,time+.05);
+  osc.connect(g);g.connect(gain);
+  osc.start(time); osc.stop(time+.06);
+}
+function offbeatSound(time){
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type='square';osc.frequency.value=880;
+  g.gain.setValueAtTime(.5,time);
+  g.gain.exponentialRampToValueAtTime(.001,time+.05);
+  osc.connect(g);g.connect(gain);
+  osc.start(time);osc.stop(time+.06);
+}
+function flashLamp(time){
+  const t=(time-ctx.currentTime)*1000;
+  setTimeout(()=>{
+    offbeatLamp.style.background='#22c55e';
+    offbeatLamp.style.boxShadow='0 0 14px #22c55e';
+    setTimeout(()=>{
+      offbeatLamp.style.background='#ccc';
+      offbeatLamp.style.boxShadow='0 0 6px rgba(0,0,0,.15)';
+    },120);
+  },t);
+}
 
-    let notes = [], score = 0, runningGame = false, createTimer, moveTimer;
+function pulseBeat(time){
+  const t=(time-ctx.currentTime)*1000;
+  setTimeout(()=>{
+    pulse.style.transform='scale(1.5)';
+    pulse.style.opacity='1';
+    setTimeout(()=>{
+      pulse.style.transform='scale(1)';
+      pulse.style.opacity='.4';
+    },140);
+  },t);
+}
 
-    function createNote() {
-      const note = document.createElement('div');
-      Object.assign(note.style, {
-        position: 'absolute',
-        left: '180px',
-        width: '40px',
-        height: '20px',
-        background: '#00ffea',
-        borderRadius: '5px',
-        top: '0px'
-      });
-      game.appendChild(note);
-      notes.push(note);
-    }
+const bpm=document.getElementById('bpm');
+const bpmNum=document.getElementById('bpmNum');
+[bpm,bpmNum].forEach(el=>el.addEventListener("input",()=>{
+  bpm.value=bpmNum.value=el.value;
+}));
 
-    function updateNotes() {
-      for (let i = 0; i < notes.length; i++) {
-        let n = notes[i];
-        let top = parseInt(n.style.top);
-        n.style.top = top + 5 + 'px';
-        if (top > 600) { n.remove(); notes.splice(i, 1); i--; }
+const beats=document.getElementById('beats');
+const beatsNum=document.getElementById('beatsNum');
+[beats,beatsNum].forEach(el=>el.addEventListener("input",()=>{
+  beats.value=beatsNum.value=el.value;
+}));
+vol.addEventListener("input",()=>gain&&(gain.gain.value=parseFloat(vol.value)));
+volNum.addEventListener("input",()=>gain&&(gain.gain.value=parseFloat(volNum.value)));
+
+let running=false,nextNote=0,beatIdx=0,timer;
+let sessionLeft=0,sessionInterval;
+
+function schedule(){
+  const bp=parseFloat(bpm.value);
+  const spb=60/bp;
+  while(running && nextNote < ctx.currentTime+.15){
+    clickSound(nextNote,beatIdx===0);
+    pulseBeat(nextNote);
+
+    const sub=parseInt(subdiv.value);
+    if(sub>1){
+      const base=spb/sub;
+      for(let i=1;i<sub;i++){
+        let ss=nextNote+base*i;
+        clickSound(ss,false);
       }
     }
 
-    function checkHit() {
-      for (let i = 0; i < notes.length; i++) {
-        let n = notes[i];
-        let top = parseInt(n.style.top);
-        if (top > 470 && top < 530) {
-          score += 100;
-          scoreLabel.textContent = 'Score: ' + score;
-          n.remove();
-          notes.splice(i, 1);
-          break;
-        }
-      }
+    if(swingToggle.checked && parseInt(subdiv.value)===2){
+      const long=spb*.66;
+      const short=spb*.34;
+      clickSound(nextNote+long,false);
     }
 
-    document.addEventListener('keydown', e => {
-      if (e.code === 'Space' && runningGame) checkHit();
-    });
+    if(offbeatToggle.checked){
+      const half=spb/2;
+      offbeatSound(nextNote+half);
+      flashLamp(nextNote+half);
+    }
 
-    startBtn.addEventListener('click', () => {
-      if (!runningGame) {
-        runningGame = true;
-        score = 0;
-        scoreLabel.textContent = 'Score: 0';
-        startBtn.textContent = '■ ストップ';
-        createTimer = setInterval(createNote, 1000);
-        moveTimer = setInterval(updateNotes, 30);
-      } else {
-        runningGame = false;
-        clearInterval(createTimer);
-        clearInterval(moveTimer);
-        notes.forEach(n => n.remove());
-        notes = [];
-        startBtn.textContent = '▶ スタート';
+    uiUpdate(nextNote,beatIdx);
+    beatIdx=(beatIdx+1)%parseInt(beats.value);
+    nextNote+=spb;
+
+    if(autoBpm.checked && beatIdx===0){
+      bpm.value=Number(bpm.value)+Number(autoStep.value);
+      bpmNum.value=bpm.value;
+    }
+  }
+  timer=setTimeout(schedule,25);
+}
+function uiUpdate(t,i){
+  const d=(t-ctx.currentTime)*1000;
+  setTimeout(()=>{
+    beatNow.textContent=i+1;
+    const pct=((i+1)/beats.value)*100;
+    bar.style.width=pct+"%";
+    if(pct>=99) setTimeout(()=>bar.style.width='0%',80);
+  },d);
+}
+function start(){
+  audioInit();
+  if(ctx.state==='suspended') ctx.resume();
+  running=true;
+  beatIdx=parseInt(beats.value)-1;
+  nextNote=ctx.currentTime+.1;
+  schedule();
+  playToggle.textContent="■ ストップ";
+
+  sessionLeft=parseInt(sessionTimer.value);
+  if(sessionLeft>0){
+    sessionInterval=setInterval(()=>{
+      sessionLeft--;
+      if(sessionLeft<=0){
+        stop();
+        clearInterval(sessionInterval);
       }
-    });
-  </script>
+    },1000);
+  }
+}
+function stop(){
+  running=false;
+  clearTimeout(timer);
+  beatNow.textContent='–';
+  bar.style.width='0%';
+  playToggle.textContent="▶ スタート";
+}
+function panic(){
+  stop();
+  if(ctx){ctx.close();ctx=null;gain=null;}
+}
+
+playToggle.onclick=()=>running?stop():start();
+panicBtn.onclick=panic;
+
+function save(){
+  localStorage.setItem("mset",JSON.stringify({
+    bpm:bpm.value,beats:beats.value,vol:vol.value,
+    subdiv:subdiv.value,swing:swingToggle.checked,
+    off:offbeatToggle.checked
+  }));
+}
+[bpm,beats,vol,subdiv,swingToggle,offbeatToggle].forEach(e=>e.addEventListener("change",save));
+
+const S=JSON.parse(localStorage.getItem("mset")||"null");
+if(S){
+  bpm.value=bpmNum.value=S.bpm;
+  beats.value=beatsNum.value=S.beats;
+  vol.value=volNum.value=S.vol;
+  subdiv.value=S.subdiv;
+  swingToggle.checked=S.swing;
+  offbeatToggle.checked=S.off;
+}
+
+/* ★★★ Rhythm Game ★★★ */
+const game=document.getElementById("game");
+const scoreLabel=document.getElementById("scoreLabel");
+const gameStart=document.getElementById("gameStart");
+
+let notes=[],gRun=false,gScore=0,genTimer,moveTimer;
+
+function genNote(){
+  const n=document.createElement('div');
+  Object.assign(n.style,{
+    position:'absolute',left:'180px',width:'40px',height:'20px',
+    background:'#00ffea',borderRadius:'5px',top:'0px'
+  });
+  game.appendChild(n);notes.push(n);
+}
+function moveNotes(){
+  for(let i=0;i<notes.length;i++){
+    let n=notes[i];
+    let t=parseInt(n.style.top);
+    n.style.top=(t+5)+'px';
+    if(t>600){n.remove();notes.splice(i,1);i--;}
+  }
+}
+function hit(){
+  for(let i=0;i<notes.length;i++){
+    let n=notes[i];
+    let t=parseInt(n.style.top);
+    if(t>470 && t<530){
+      gScore+=100;
+      scoreLabel.textContent="Score: "+gScore;
+      n.remove();notes.splice(i,1);
+      break;
+    }
+  }
+}
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space" && gRun)hit();
+});
+gameStart.onclick=()=>{
+  if(!gRun){
+    gRun=true;gScore=0;scoreLabel.textContent="Score: 0";
+    gameStart.textContent='■ ストップ';
+    genTimer=setInterval(genNote,900);
+    moveTimer=setInterval(moveNotes,30);
+  }else{
+    gRun=false;
+    clearInterval(genTimer);clearInterval(moveTimer);
+    notes.forEach(n=>n.remove());notes=[];
+    gameStart.textContent='▶ スタート';
+  }
+};
+</script>
 </body>
 </html>
