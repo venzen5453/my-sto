@@ -1,1250 +1,769 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>パステル・DAW メトロノーム</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>パステル × DAW メトロノーム</title>
 
 <style>
-/* ================================
-   パステル × DAW  UI デザイン
-   ================================ */
+/* ==========================================================
+   PART 1 — Pastel × DAW Style CSS
+========================================================== */
 
 :root{
-  --bg:#f9faff;
-  --card:#ffffff;
-  --text:#2d334a;
-  --muted:#687087;
-  --line:#e3e8f0;
-
-  /* パステルトーン */
-  --pastel-pink:#ffdcef;
-  --pastel-blue:#dff1ff;
-  --pastel-mint:#dcffef;
-
-  /* ボタンカラー */
-  --primary:#6aa6ff;
-  --primary-dark:#3b82f6;
-  --danger:#ff6b7a;
-
-  /* ダークモード */
-  --bg-dark:#1d1f27;
-  --card-dark:#2a2d38;
-  --text-dark:#f1f5ff;
-  --line-dark:#3c3e48;
-
-  font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+  --bg:#fdfcff;
+  --card:#ffffffee;
+  --text:#1e1b2e;
+  --muted:#7a7890;
+  --pastel1:#ffd8e8;
+  --pastel2:#d8eaff;
+  --pastel3:#e8ffe6;
+  --daw-accent:#ff0077;
+  --daw-blue:#6aa3ff;
+  --line:#eae8f2;
 }
 
 body{
   margin:0;
-  background:linear-gradient(135deg, var(--pastel-pink), var(--pastel-blue), var(--pastel-mint));
-  min-height:100vh;
-  padding:25px 10px;
+  font-family: "Inter",sans-serif;
+  background:linear-gradient(135deg,var(--pastel1),var(--pastel2));
+  padding:20px;
   color:var(--text);
-  transition:background .5s ease;
 }
 
-body.dark{
-  background:#101219;
-  color:var(--text-dark);
-}
-
-/* ===========================
-   Layout
-   =========================== */
 .wrap{
-  width:min(1000px, 92vw);
+  width:min(1100px,96%);
   margin:0 auto;
 }
 
 .card{
   background:var(--card);
+  padding:20px 26px;
   border-radius:22px;
-  padding:28px;
-  box-shadow:0 10px 30px rgba(0,0,0,.07);
-  border:1px solid var(--line);
-  transition:background .3s, color .3s;
+  box-shadow:0 10px 35px rgba(0,0,0,0.1);
 }
 
-body.dark .card{
-  background:var(--card-dark);
-  border-color:var(--line-dark);
-}
-
-/* ===========================
-   Titles
-   =========================== */
-.title{
-  font-size:clamp(22px, 4vw, 32px);
-  font-weight:800;
-  text-align:center;
+h1.title{
   margin:0 0 8px;
+  font-size:26px;
+  font-weight:800;
 }
-
 .subtitle{
-  text-align:center;
   color:var(--muted);
-  margin-bottom:25px;
+  margin:0 0 18px;
 }
 
-/* ===========================
-   Panels
-   =========================== */
 .panel{
-  background:#fff;
-  border-radius:18px;
-  padding:20px 18px;
-  margin-bottom:22px;
   border:1px solid var(--line);
-  box-shadow:0 4px 14px rgba(0,0,0,.05);
+  padding:16px;
+  border-radius:16px;
+  margin:20px 0;
+  background:#ffffffcc;
 }
 
-body.dark .panel{
-  background:var(--card-dark);
-  border-color:var(--line-dark);
-}
-
-.panel h2{
-  margin-top:0;
-  font-size:20px;
-  font-weight:700;
-  margin-bottom:14px;
-}
-
-/* ===========================
-   Form Rows
-   =========================== */
 .row{
   display:flex;
   align-items:center;
-  gap:14px;
-  margin:12px 0;
-  flex-wrap:wrap;
+  gap:16px;
+  margin:10px 0;
 }
 
-label{
-  min-width:110px;
-  font-weight:600;
-  color:var(--muted);
-}
+label{ width:140px; color:var(--muted); }
 
-input[type="range"]{
-  flex:1;
-}
-
-input[type="number"], select{
-  padding:6px 8px;
-  border-radius:10px;
+input[type=range]{ flex:1; }
+input[type=number],
+select{
+  padding:5px 8px;
   border:1px solid var(--line);
-  font-size:15px;
+  border-radius:6px;
 }
 
-body.dark input, 
-body.dark select{
-  background:#2f3240;
-  border-color:#444;
-  color:#fff;
-}
-
-/* ===========================
-   Buttons
-   =========================== */
+/* Buttons */
 button{
   border:none;
-  border-radius:12px;
   padding:10px 16px;
-  font-weight:700;
+  border-radius:12px;
   cursor:pointer;
-  transition:0.15s ease;
+  font-weight:700;
 }
-
 .btn-primary{
-  background:var(--primary);
+  background:var(--daw-blue);
   color:#fff;
 }
-.btn-primary:hover{
-  background:var(--primary-dark);
-}
-
 .btn-secondary{
-  background:#dfe7f3;
-  color:#2a2f3f;
+  background:#e7ecf7;
 }
-body.dark .btn-secondary{
-  background:#383c4e;
-  color:#fff;
-}
-
 .btn-ghost{
   background:#fff;
   border:1px solid var(--line);
-  color:#333;
-}
-body.dark .btn-ghost{
-  background:#2b2d37;
-  border-color:#444;
-  color:#fafafa;
 }
 
-.btn-danger{
-  background:var(--danger);
-  color:#fff;
-}
-
-/* ===========================
-   Progress / Pulse
-   =========================== */
+/* Progress bar */
 .progress{
-  margin-top:16px;
+  width:100%;
   height:10px;
-  background:#e0e4ef;
-  border-radius:10px;
+  background:#eee;
+  border-radius:6px;
   overflow:hidden;
+  margin-top:10px;
 }
-#bar{
+.bar{
   width:0%;
   height:100%;
-  background:linear-gradient(90deg,#7da7ff,#9affd9);
-  transition:width .1s;
-}
-
-.beat-now{
-  font-size:22px;
-  font-weight:800;
-}
-
-.pulse{
-  width:40px;
-  height:40px;
-  margin:18px auto 0;
-  background:#9acbff;
-  border-radius:50%;
-  opacity:.35;
-  transition:transform .14s ease, opacity .14s ease;
-}
-
-/* ===========================
-   Offbeat Lamp
-   =========================== */
-.offbeat-lamp{
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#ccc;
-  box-shadow:0 0 6px rgba(0,0,0,0.15);
-  transition:0.1s;
-}
-
-/* ===========================
-   Beat Grid (DAW-style)
-   =========================== */
-.beat-grid{
-  display:flex;
-  gap:10px;
-  margin-top:18px;
-}
-.beatDot{
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  background:#e2e6ef;
+  background:linear-gradient(90deg,var(--pastel1),var(--pastel3));
   transition:.1s;
 }
-.beatDot.active{
-  background:#7da7ff;
-  box-shadow:0 0 10px #7da7ff;
+.beat-indicator{
+  margin-top:6px;
+}
+.beat-now{
+  font-weight:700;
 }
 
-/* ===========================
-   Pattern Buttons
-   =========================== */
+/* Pulse */
+.pulse{
+  width:26px; height:26px;
+  border-radius:50%;
+  margin:10px auto 0;
+  background:var(--pastel1);
+  opacity:.35;
+  transform:scale(1);
+  transition:.15s;
+}
+
+/* Offbeat lamp */
+.offbeat-lamp{
+  width:20px; height:20px;
+  border-radius:50%;
+  background:#ccc;
+  box-shadow:0 0 5px rgba(0,0,0,.2);
+}
+
+/* Pattern grid */
 .pattern-grid{
   display:flex;
   gap:10px;
-  margin-top:10px;
 }
 .patternBtn{
-  width:32px;
-  height:32px;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid var(--line);
-  background:#fff;
+  padding:8px 12px;
+  background:#eee;
+  border-radius:10px;
   cursor:pointer;
 }
 .patternBtn.active{
-  background:#7da7ff;
-  color:#fff;
-  border-color:#5c8ff0;
+  background:var(--pastel2);
+  font-weight:700;
 }
 
-/* ===========================
-   Accuracy Box
-   =========================== */
-.accuracy-box{
-  padding:12px;
-  border-radius:10px;
-  background:#eef3ff;
-  border:1px solid #d3daf3;
-}
-
-body.dark .accuracy-box{
-  background:#2e3243;
-  border-color:#444;
-}
-
-/* ===========================
-   History Area
-   =========================== */
-.history-area{
+/* Beat grid */
+.beat-grid{
   margin-top:10px;
-  padding:10px;
-  background:#f6f8ff;
+  display:flex;
+  gap:6px;
+}
+.beatDot{
+  width:16px; height:16px;
+  border-radius:50%;
+  background:#ddd;
+}
+.beatDot.active{
+  background:var(--daw-accent);
+}
+
+/* Accuracy */
+.accuracy-box{
+  padding:14px;
   border-radius:12px;
-  max-height:250px;
-  overflow:auto;
+  background:#f8f8ff;
+  border:1px solid var(--line);
+  margin-top:10px;
 }
 
-body.dark .history-area{
-  background:#2e3240;
+/* History */
+.history-area{
+  padding:10px;
+  background:#fafaff;
+  border-radius:10px;
+  border:1px solid var(--line);
+  margin-top:10px;
 }
+
+/* Dark mode */
+body.dark{
+  --bg:#111;
+  --card:#222;
+  --text:#eee;
+  --muted:#bbb;
+  --line:#333;
+  background:#000;
+}
+
 </style>
-
-  
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card">
 
-      <h1 class="title">🎀 パステル × DAW メトロノーム 🎶</h1>
-      <p class="subtitle">かわいいパステルデザイン ＋ プロ音楽ツール機能</p>
+<div class="wrap">
+<div class="card">
 
-      <!-- ===================== -->
-      <!-- 基本コントロール -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>基本コントロール</h2>
+<h1 class="title">🎀 パステル × DAW メトロノーム 🎶</h1>
+<p class="subtitle">かわいい × プロ仕様のハイブリッド・メトロノーム</p>
 
-        <div class="row">
-          <label>BPM</label>
-          <input id="bpm" type="range" min="30" max="240" value="100" />
-          <input id="bpmNum" type="number" min="30" max="240" value="100" />
-        </div>
+<!-- =====================================================
+     BASIC CONTROLS (PART1)
+===================================================== -->
+<section class="panel">
+<h2>基本コントロール</h2>
 
-        <div class="row">
-          <label>拍子</label>
-          <input id="beats" type="range" min="1" max="12" value="4" />
-          <input id="beatsNum" type="number" min="1" max="12" value="4" />
-        </div>
+<div class="row">
+<label>BPM</label>
+<input id="bpm" type="range" min="30" max="240" value="100"/>
+<input id="bpmNum" type="number" min="30" max="240" value="100"/>
+</div>
 
-        <div class="row">
-          <label>音量</label>
-          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.7" />
-          <input id="volNum" type="number" min="0" max="1" step="0.01" value="0.7" />
-        </div>
+<div class="row">
+<label>拍子</label>
+<input id="beats" type="range" min="1" max="12" value="4"/>
+<input id="beatsNum" type="number" min="1" max="12" value="4"/>
+</div>
 
-        <div class="row">
-          <label>音色</label>
-          <select id="soundType">
-            <option value="default">標準クリック</option>
-            <option value="hihat">ハイハット</option>
-            <option value="snare">スネア</option>
-            <option value="kick">キック</option>
-          </select>
-        </div>
+<div class="row">
+<label>音量</label>
+<input id="vol" type="range" min="0" max="1" step="0.01" value="0.7"/>
+<input id="volNum" type="number" min="0" max="1" step="0.01" value="0.7"/>
+</div>
 
-        <button id="playToggle" class="btn-primary">▶ スタート</button>
-        <button id="panicBtn" class="btn-danger">■ パニック停止</button>
+<div class="row">
+<label>音色</label>
+<select id="soundType">
+<option value="default">標準クリック</option>
+<option value="hihat">ハイハット</option>
+<option value="snare">スネア</option>
+<option value="kick">キック</option>
+</select>
+</div>
 
-        <div class="progress">
-          <div id="bar" class="bar"></div>
-        </div>
-        <div class="beat-indicator">
-          現在の拍: <span id="beatNow" class="beat-now">–</span>
-        </div>
+<button id="playToggle" class="btn-primary">▶ スタート</button>
+<button id="panicBtn" class="btn-danger">■ 停止</button>
 
-        <!-- DAWスタイルの視覚パルス -->
-        <div id="pulse" class="pulse"></div>
-      </section>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div class="beat-indicator">
+現在の拍: <span id="beatNow" class="beat-now">–</span>
+</div>
 
-      <!-- ===================== -->
-      <!-- 裏拍 / サブディビジョン / スイング -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>リズム設定</h2>
+<div id="pulse" class="pulse"></div>
+</section>
 
-        <div class="row">
-          <input id="offbeatToggle" type="checkbox" checked />
-          <label for="offbeatToggle">裏拍を鳴らす</label>
-          <div id="offbeatLamp" class="offbeat-lamp"></div>
-        </div>
+<!-- =====================================================
+     RHYTHM SETTINGS
+===================================================== -->
+<section class="panel">
+<h2>リズム設定</h2>
 
-        <div class="row">
-          <label>サブディビジョン</label>
-          <select id="subdiv">
-            <option value="1">なし</option>
-            <option value="2">2分割</option>
-            <option value="3">3分割</option>
-            <option value="4">4分割</option>
-          </select>
-        </div>
+<div class="row">
+<input id="offbeatToggle" type="checkbox" checked/>
+<label for="offbeatToggle">裏拍を鳴らす</label>
+<div id="offbeatLamp" class="offbeat-lamp"></div>
+</div>
 
-        <div class="row">
-          <input id="swingToggle" type="checkbox" />
-          <label for="swingToggle">スイングを有効にする（2連時）</label>
-        </div>
-      </section>
+<div class="row">
+<label>サブディビジョン</label>
+<select id="subdiv">
+<option value="1">なし</option>
+<option value="2">2分割</option>
+<option value="3">3分割</option>
+<option value="4">4分割</option>
+</select>
+</div>
 
-      <!-- ===================== -->
-      <!-- パターン・アクセント機能 -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>アクセントパターン</h2>
+<div class="row">
+<input id="swingToggle" type="checkbox"/>
+<label for="swingToggle">スイング（2連）</label>
+</div>
+</section>
 
-        <div class="row">
-          <label>パターン</label>
-          <select id="patternSelect">
-            <option value="default">最強拍のみ</option>
-            <option value="rock">ロック（1,3）</option>
-            <option value="backbeat">バックビート（2,4）</option>
-            <option value="clave">クラーベ</option>
-            <option value="custom">カスタム</option>
-          </select>
-        </div>
+<!-- =====================================================
+     ACCENT PATTERNS
+===================================================== -->
+<section class="panel">
+<h2>アクセントパターン</h2>
 
-        <div id="customPatternArea" class="panel-inner" style="display:none;">
-          <p>カスタムパターンを設定：</p>
-          <div id="patternButtons" class="pattern-grid"></div>
-        </div>
+<div class="row">
+<label>パターン</label>
+<select id="patternSelect">
+<option value="default">最強拍のみ</option>
+<option value="rock">ロック (1,3)</option>
+<option value="backbeat">バックビート (2,4)</option>
+<option value="clave">クラーベ</option>
+<option value="custom">カスタム</option>
+</select>
+</div>
 
-        <!-- DAW風の拍インジケータ -->
-        <div id="beatGrid" class="beat-grid"></div>
-      </section>
+<div id="customPatternArea" class="panel-inner" style="display:none;">
+<p>カスタムパターンを設定：</p>
+<div id="patternButtons" class="pattern-grid"></div>
+</div>
 
-      <!-- ===================== -->
-      <!-- ループ練習 / セッションタイマー -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>ループ練習</h2>
-        <div class="row">
-          <label>ループモード</label>
-          <select id="loopMode">
-            <option value="none">なし</option>
-            <option value="2-4">2拍オン / 4拍オフ</option>
-            <option value="4-4">4拍オン / 4拍オフ</option>
-            <option value="custom">カスタム</option>
-          </select>
-        </div>
+<div id="beatGrid" class="beat-grid"></div>
+</section>
 
-        <div id="customLoopArea" style="display:none;">
-          <div class="row">
-            <label>オン拍数</label>
-            <input id="loopOn" type="number" min="1" max="32" value="4" />
-          </div>
-          <div class="row">
-            <label>オフ拍数</label>
-            <input id="loopOff" type="number" min="0" max="32" value="4" />
-          </div>
-        </div>
+<!-- =====================================================
+     LOOP PRACTICE / SESSION TIMER
+===================================================== -->
+<section class="panel">
+<h2>ループ練習</h2>
 
-        <h2>セッションタイマー</h2>
-        <div class="row">
-          <label>練習時間（秒）</label>
-          <input id="sessionTimer" type="number" min="0" max="3600" value="0" />
-        </div>
-      </section>
+<div class="row">
+<label>ループモード</label>
+<select id="loopMode">
+<option value="none">なし</option>
+<option value="2-4">2拍オン / 4拍オフ</option>
+<option value="4-4">4拍オン / 4拍オフ</option>
+<option value="custom">カスタム</option>
+</select>
+</div>
 
-      <!-- ===================== -->
-      <!-- オートBPM / カーブ（Accel/Rit） -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>BPM 自動変化</h2>
+<div id="customLoopArea" style="display:none;">
+<div class="row">
+<label>オン拍</label>
+<input id="loopOn" type="number" min="1" max="32" value="4"/>
+</div>
+<div class="row">
+<label>オフ拍</label>
+<input id="loopOff" type="number" min="0" max="32" value="4"/>
+</div>
+</div>
 
-        <div class="row">
-          <input id="autoBpm" type="checkbox" />
-          <label for="autoBpm">小節ごとに自動BPMアップ</label>
-        </div>
+<h2>セッションタイマー</h2>
+<div class="row">
+<label>練習時間（秒）</label>
+<input id="sessionTimer" type="number" min="0" max="3600" value="0"/>
+</div>
+</section>
 
-        <div class="row">
-          <label>上昇量</label>
-          <input id="autoStep" type="number" min="0" max="20" value="1" />
-        </div>
+<!-- =====================================================
+     AUTO BPM / BPM CURVE
+===================================================== -->
+<section class="panel">
+<h2>BPM 自動変化</h2>
 
-        <div class="row">
-          <label>テンポカーブ</label>
-          <select id="bpmCurve">
-            <option value="none">なし</option>
-            <option value="accel">加速（Accelerando）</option>
-            <option value="rit">減速（Ritardando）</option>
-          </select>
-        </div>
-      </section>
+<div class="row">
+<input id="autoBpm" type="checkbox"/>
+<label for="autoBpm">小節ごとに自動BPMアップ</label>
+</div>
 
-      <!-- ===================== -->
-      <!-- Tap Tempo / Presets -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>Tap Tempo</h2>
-        <button id="tapBtn" class="btn-secondary">TAP</button>
+<div class="row">
+<label>上昇量</label>
+<input id="autoStep" type="number" min="0" max="20" value="1"/>
+</div>
 
-        <h2>プリセット</h2>
-        <div class="row">
-          <button id="presetSave" class="btn-ghost">保存</button>
-          <button id="presetLoad" class="btn-secondary">読込</button>
-        </div>
-        <select id="presetList">
-          <option value="0">プリセットを選択</option>
-        </select>
-      </section>
+<div class="row">
+<label>テンポカーブ</label>
+<select id="bpmCurve">
+<option value="none">なし</option>
+<option value="accel">加速</option>
+<option value="rit">減速</option>
+</select>
+</div>
+</section>
 
-      <!-- ===================== -->
-      <!-- 精度測定 -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>リズム精度の測定</h2>
-        <div class="row">
-          <button id="accuracyStart" class="btn-primary">測定開始</button>
-          <button id="accuracyReset" class="btn-secondary">リセット</button>
-        </div>
-        <div id="accuracyResult" class="accuracy-box">（Space キーで測定）</div>
-      </section>
+<!-- =====================================================
+     TAP TEMPO / PRESETS
+===================================================== -->
+<section class="panel">
+<h2>Tap Tempo</h2>
+<button id="tapBtn" class="btn-secondary">TAP</button>
 
-      <!-- ===================== -->
-      <!-- ビジュアライザー -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>ビジュアライザー</h2>
+<h2>プリセット</h2>
+<div class="row">
+<button id="presetSave" class="btn-ghost">保存</button>
+<button id="presetLoad" class="btn-secondary">読込</button>
+</div>
+<select id="presetList"><option value="0">プリセットを選択</option></select>
+</section>
 
-        <div class="row">
-          <label>モード</label>
-          <select id="visualMode">
-            <option value="pulse">パルス</option>
-            <option value="bars">DAWバー</option>
-            <option value="sweep">スイープ</option>
-            <option value="none">なし</option>
-          </select>
-        </div>
-      </section>
+<!-- =====================================================
+     ACCURACY
+===================================================== -->
+<section class="panel">
+<h2>リズム精度の測定</h2>
+<div class="row">
+<button id="accuracyStart" class="btn-primary">測定開始</button>
+<button id="accuracyReset" class="btn-secondary">リセット</button>
+</div>
+<div id="accuracyResult" class="accuracy-box">（Spaceキーで測定）</div>
+</section>
 
-      <!-- ===================== -->
-      <!-- WAV Export -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>WAV 書き出し（クリックトラック）</h2>
-        <button id="exportWav" class="btn-primary">WAV生成</button>
-      </section>
+<!-- =====================================================
+     VISUALIZER
+===================================================== -->
+<section class="panel">
+<h2>ビジュアライザー</h2>
 
-      <!-- ===================== -->
-      <!-- 練習履歴 -->
-      <!-- ===================== -->
-      <section class="panel">
-        <h2>練習履歴</h2>
-        <button id="showHistory" class="btn-secondary">表示 / 隠す</button>
-        <div id="historyArea" class="history-area" style="display:none;"></div>
-      </section>
+<div class="row">
+<label>モード</label>
+<select id="visualMode">
+<option value="pulse">パルス</option>
+<option value="bars">DAWバー</option>
+<option value="sweep">スイープ</option>
+<option value="none">なし</option>
+</select>
+</div>
+</section>
 
-      <!-- ===================== -->
-      <!-- ダークモード -->
-      <!-- ===================== -->
-      <section class="panel center">
-        <button id="themeToggle" class="btn-ghost">🌙 ダークモード</button>
-      </section>
+<!-- =====================================================
+     WAV EXPORT
+===================================================== -->
+<section class="panel">
+<h2>WAV書き出し</h2>
+<button id="exportWav" class="btn-primary">WAV生成</button>
+</section>
 
-    </div>
-  </div>
+<!-- =====================================================
+     HISTORY
+===================================================== -->
+<section class="panel">
+<h2>練習履歴</h2>
+<button id="showHistory" class="btn-secondary">表示/隠す</button>
+<div id="historyArea" class="history-area" style="display:none;"></div>
+</section>
+
+<!-- =====================================================
+     DARK MODE
+===================================================== -->
+<section class="panel center">
+<button id="themeToggle" class="btn-ghost">🌙 ダークモード</button>
+</section>
+
+</div></div>
 
 
-  <script>
+<!-- ==========================================================
+   PART 2~5 — JS ENGINE
+   ※ 너무 길어 중간에서 끊겼을 가능성 있음
+========================================================== -->
+
+<script>
 /* ============================================================
-   PART 3 — メトロノーム Audio エンジン（音の中心部分）
-   ============================================================ */
-
-// -----------------------------
-// Audio Setup
-// -----------------------------
-let ctx = null;
-let masterGain = null;
+   PART 2 — Audio Setup
+=========================================================== */
+let ctx=null, masterGain=null;
 
 function ensureAudio(){
-  if (ctx) return;
-
-  ctx = new (window.AudioContext || window.webkitAudioContext)();
-  masterGain = ctx.createGain();
-  masterGain.gain.value = parseFloat(vol.value);
+  if(ctx) return;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  masterGain=ctx.createGain();
+  masterGain.gain.value=parseFloat(vol.value);
   masterGain.connect(ctx.destination);
 }
 
-// -----------------------------
-// Click Sounds
-// -----------------------------
-function playClick(time, type="accent"){
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+function playClick(time,type="accent"){
+  const osc=ctx.createOscillator();
+  const g=ctx.createGain();
+  
+  let freq=1000;
+  if(type==="accent") freq=1500;
+  if(type==="subdiv") freq=800;
 
-  let freq = 1200;
+  if(soundType.value==="snare") freq=1800;
+  if(soundType.value==="hihat") freq=3500;
+  if(soundType.value==="kick") freq=180;
 
-  if (type === "accent") freq = 1600;
-  if (type === "subdiv") freq = 900;
-
-  // Sound Type (snare/hihat/kick)
-  if (soundType.value === "snare") freq = 1800;
-  if (soundType.value === "hihat") freq = 3500;
-  if (soundType.value === "kick") freq = 170;
-
-  osc.frequency.value = freq;
-
-  gain.gain.setValueAtTime(1.0, time);
-  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
-
-  osc.connect(gain);
-  gain.connect(masterGain);
-
-  osc.start(time);
-  osc.stop(time + 0.07);
+  osc.frequency.value=freq;
+  g.gain.setValueAtTime(1.0,time);
+  g.gain.exponentialRampToValueAtTime(0.001,time+0.07);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(time); osc.stop(time+0.08);
 }
 
-// -----------------------------
-// Offbeat Click
-// -----------------------------
 function playOffbeat(time){
-  const osc = ctx.createOscillator();
-  const g = ctx.createGain();
-  osc.frequency.value = 880;
-  g.gain.setValueAtTime(0.7, time);
-  g.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
-  osc.connect(g); 
-  g.connect(masterGain);
-  osc.start(time); 
-  osc.stop(time + 0.06);
+  const osc=ctx.createOscillator();
+  const g=ctx.createGain();
+  osc.frequency.value=900;
+  g.gain.setValueAtTime(0.6,time);
+  g.gain.exponentialRampToValueAtTime(0.001,time+0.06);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(time); osc.stop(time+0.06);
 }
 
-// -----------------------------
-// Elements
-// -----------------------------
-const bar = document.getElementById("bar");
-const beatNow = document.getElementById("beatNow");
-const pulse = document.getElementById("pulse");
-const offbeatLamp = document.getElementById("offbeatLamp");
-const beatGrid = document.getElementById("beatGrid");
+/* ============================================================
+   PART 3 — Core Scheduling Engine
+=========================================================== */
+const bar=document.getElementById("bar");
+const beatNow=document.getElementById("beatNow");
+const pulse=document.getElementById("pulse");
+const offbeatLamp=document.getElementById("offbeatLamp");
+const beatGrid=document.getElementById("beatGrid");
+const customPatternArea=document.getElementById("customPatternArea");
+const patternButtons=document.getElementById("patternButtons");
 
-const customPatternArea = document.getElementById("customPatternArea");
-const patternButtons = document.getElementById("patternButtons");
-
-// -----------------------------
-// Beat Grid
-// -----------------------------
+let customPattern=[];
 function updateBeatGrid(count){
-  beatGrid.innerHTML = "";
-  for (let i=0; i<count; i++){
-    const dot = document.createElement("div");
-    dot.className = "beatDot";
-    beatGrid.appendChild(dot);
+  beatGrid.innerHTML="";
+  for(let i=0;i<count;i++){
+    const d=document.createElement("div");
+    d.className="beatDot";
+    beatGrid.appendChild(d);
   }
 }
 updateBeatGrid(4);
 
-// -----------------------------
-// State
-// -----------------------------
-let nextTime = 0;
-let running = false;
-let beatIndex = 0;
-let timerID;
+let nextTime=0, running=false, beatIndex=0, timerID;
+let loopCounter=0, loopPlaying=true;
 
-let customPattern = []; 
-
-// -----------------------------
-// Custom Pattern UI
-// -----------------------------
-function buildCustomPatternUI(){
-  patternButtons.innerHTML = "";
-  const n = Number(beats.value);
-  customPattern = new Array(n).fill(false);
-
-  for (let i=0; i<n; i++){
-    const b = document.createElement("div");
-    b.className = "patternBtn";
-    b.textContent = i+1;
-    b.dataset.index = i;
-
-    b.onclick = () => {
-      const idx = Number(b.dataset.index);
-      customPattern[idx] = !customPattern[idx];
-      b.classList.toggle("active", customPattern[idx]);
-    };
-
-    patternButtons.appendChild(b);
-  }
-}
-
-// -----------------------------
-// Count-In
-// -----------------------------
-function scheduleCountIn(){
-  const interval = 60 / Number(bpm.value);
-  let t = ctx.currentTime + 0.1;
-
-  for (let i=0; i<4; i++){
-    playClick(t, "accent");
-    t += interval;
-  }
-  return t;
-}
-
-// -----------------------------
-// Pulse Visual
-// -----------------------------
-function pulseBeat(time){
-  const delay = Math.max(0, (time - ctx.currentTime) * 1000);
-
-  setTimeout(()=>{
-    pulse.style.transform = "scale(1.5)";
-    pulse.style.opacity = "1";
-    setTimeout(()=>{
-      pulse.style.transform = "scale(1)";
-      pulse.style.opacity = ".35";
-    }, 140);
-  }, delay);
-}
-
-// -----------------------------
-// Beat Dot Visual
-// -----------------------------
-function activeBeatDot(time, idx){
-  const dots = beatGrid.children;
-  const delay = Math.max(0, (time - ctx.currentTime)*1000);
-
-  setTimeout(()=>{
-    [...dots].forEach((d,i)=>d.classList.toggle("active", i===idx));
-  }, delay);
-}
-
-// -----------------------------
-// Offbeat Lamp
-// -----------------------------
 function flashOffbeat(time){
-  const d = Math.max(0,(time-ctx.currentTime)*1000);
-
+  const d=Math.max(0,(time-ctx.currentTime)*1000);
   setTimeout(()=>{
-    offbeatLamp.style.background = "#7ce8b3";
-    offbeatLamp.style.boxShadow = "0 0 14px #22c55e";
+    offbeatLamp.style.background="#22c55e";
+    offbeatLamp.style.boxShadow="0 0 14px #22c55e";
     setTimeout(()=>{
-      offbeatLamp.style.background = "#ccc";
-      offbeatLamp.style.boxShadow = "0 0 6px rgba(0,0,0,.2)";
+      offbeatLamp.style.background="#ccc";
+      offbeatLamp.style.boxShadow="0 0 6px rgba(0,0,0,0.2)";
+    },140);
+  },d);
+}
+
+function pulseBeat(time){
+  const delay=Math.max(0,(time-ctx.currentTime)*1000);
+  setTimeout(()=>{
+    pulse.style.transform="scale(1.6)";
+    pulse.style.opacity="1";
+    setTimeout(()=>{
+      pulse.style.transform="scale(1)";
+      pulse.style.opacity=".35";
     },150);
-  }, d);
+  },delay);
 }
 
-// -----------------------------
-// Subdivision
-// -----------------------------
-function scheduleSubdivision(time, interval, subdiv){
-  if (subdiv <= 1) return;
-
-  const swingOn = swingToggle.checked && subdiv === 2;
-
-  for (let i=1; i<subdiv; i++){
-    let t2;
-
-    if (swingOn){
-      const ratio = 0.66;
-      if (i === 1) t2 = time + interval * ratio;
-      if (i === 2) t2 = time + interval * (ratio + (1-ratio));
-    } else {
-      t2 = time + interval * i;
-    }
-
-    playClick(t2, "subdiv");
-  }
+function activeBeatDot(time,idx){
+  const dots=beatGrid.children;
+  const delay=Math.max(0,(time-ctx.currentTime)*1000);
+  setTimeout(()=>{
+    [...dots].forEach((d,i)=>d.classList.toggle("active",i===idx));
+  },delay);
 }
 
-// -----------------------------
-// Accent Pattern
-// -----------------------------
 function isStrongBeat(i){
-  const b = Number(beats.value);
-  const mode = patternSelect.value;
-
-  if (mode === "default") return i === 0;
-  if (mode === "rock") return i === 0 || i === 2;
-  if (mode === "backbeat") return i === 1 || i === 3;
-
-  if (mode === "clave"){
-    const pattern = [true,false,false,true,false,true,false,false];
-    return pattern[i % 8];
+  const b=Number(beats.value);
+  const mode=patternSelect.value;
+  if(mode==="default") return i===0;
+  if(mode==="rock") return i===0||i===2;
+  if(mode==="backbeat") return i===1||i===3;
+  if(mode==="clave"){
+    const p=[true,false,false,true,false,true,false,false];
+    return p[i%8];
   }
-
-  if (mode === "custom"){
-    return !!customPattern[i];
-  }
-
-  return i === 0;
+  if(mode==="custom") return !!customPattern[i];
+  return i===0;
 }
 
-// -----------------------------
-// Poly Rhythm
-// -----------------------------
-function schedulePoly(time){
-  const A = Number(polyA?.value || 0);
-  const B = Number(polyB?.value || 0);
+function scheduleSubdivision(time,intv,sub){
+  if(sub<=1) return;
+  const swing= swingToggle.checked && sub===2;
 
-  if (!A || !B) return;
-
-  const interval = 60 / Number(bpm.value);
-  const ia = interval / A;
-  const ib = interval / B;
-
-  for (let i=0;i<A;i++) playClick(time + ia*i, "subdiv");
-  for (let j=0;j<B;j++) playClick(time + ib*j, "subdiv");
+  for(let i=1;i<sub;i++){
+    let t2;
+    if(swing){
+      const ratio=0.66;
+      if(i===1) t2=time+intv*ratio;
+      if(i===2) t2=time+intv*(ratio+(1-ratio));
+    }else{
+      t2=time+intv*i;
+    }
+    playClick(t2,"subdiv");
+  }
 }
-
-// -----------------------------
-// Loop Training Logic
-// -----------------------------
-let loopCounter = 0;
-let loopPlaying = true;
 
 function handleLoop(){
-  const mode = loopMode.value;
+  const mode=loopMode.value;
+  if(mode==="none") return;
 
-  if (mode === "none") return;
-
-  if (mode === "2-4"){
-    if (loopCounter < 2) loopPlaying = true;
-    else if (loopCounter < 6) loopPlaying = false;
-    else loopCounter = -1;
+  if(mode==="2-4"){
+    if(loopCounter<2) loopPlaying=true;
+    else if(loopCounter<6) loopPlaying=false;
+    else loopCounter=-1;
   }
-
-  if (mode === "4-4"){
-    if (loopCounter < 4) loopPlaying = true;
-    else if (loopCounter < 8) loopPlaying = false;
-    else loopCounter = -1;
+  if(mode==="4-4"){
+    if(loopCounter<4) loopPlaying=true;
+    else if(loopCounter<8) loopPlaying=false;
+    else loopCounter=-1;
   }
-
-  if (mode === "custom"){
-    const on = Number(loopOn.value);
-    const off = Number(loopOff.value);
-    if (loopCounter < on) loopPlaying = true;
-    else if (loopCounter < on+off) loopPlaying = false;
-    else loopCounter = -1;
+  if(mode==="custom"){
+    const on=Number(loopOn.value);
+    const off=Number(loopOff.value);
+    if(loopCounter<on) loopPlaying=true;
+    else if(loopCounter<on+off) loopPlaying=false;
+    else loopCounter=-1;
   }
-}
-
-// -----------------------------
-// Auto BPM / Tempo Curve
-// -----------------------------
-function applyBpmCurve(){
-  if (bpmCurve.value === "accel") bpm.value = Number(bpm.value) + 0.03;
-  if (bpmCurve.value === "rit")   bpm.value = Number(bpm.value) - 0.03;
-  bpmNum.value = bpm.value;
 }
 
 function applyAutoBpm(){
-  if (!autoBpm.checked) return;
-  if (beatIndex === 0){
-    bpm.value = Number(bpm.value) + Number(autoStep.value);
-    bpmNum.value = bpm.value;
+  if(!autoBpm.checked) return;
+  if(beatIndex===0){
+    bpm.value=Number(bpm.value)+Number(autoStep.value);
+    bpmNum.value=bpm.value;
   }
 }
 
-// -----------------------------
-// Session Timer
-// -----------------------------
-let sessionRemain = 0;
-let sessionTimerID;
-
-function startSessionTimer(){
-  sessionRemain = Number(sessionTimer.value);
-
-  if (sessionRemain > 0){
-    sessionTimerID = setInterval(()=>{
-      sessionRemain--;
-      if (sessionRemain <= 0) stopMetronome();
-    },1000);
+function applyBpmCurve(){
+  if(bpmCurve.value==="accel"){
+    bpm.value=Number(bpm.value)+0.03;
   }
+  if(bpmCurve.value==="rit"){
+    bpm.value=Number(bpm.value)-0.03;
+  }
+  bpmNum.value=bpm.value;
 }
 
-// -----------------------------
-// Main Scheduler
-// -----------------------------
+let sessionRemain=0, sessionTimerID;
+
 function scheduleNotes(){
-  const bpmVal = Number(bpm.value);
-  const interval = 60 / bpmVal;
-  const subdiv = Number(subdiv.value);
+  const bpmVal=Number(bpm.value);
+  const interval=60/bpmVal;
+  const subdiv=Number(subdiv.value);
 
-  while (running && nextTime < ctx.currentTime + 0.15){
-
+  while(running && nextTime < ctx.currentTime+0.12){
     handleLoop();
 
-    if (loopPlaying){
-      if (isStrongBeat(beatIndex)) playClick(nextTime,"accent");
+    if(loopPlaying){
+      if(isStrongBeat(beatIndex)) playClick(nextTime,"accent");
       else playClick(nextTime,"beat");
     }
 
-    scheduleSubdivision(nextTime, interval/subdiv, subdiv);
-    schedulePoly(nextTime);
+    scheduleSubdivision(nextTime,interval/subdiv,subdiv);
 
-    if (offbeatToggle.checked){
-      flashOffbeat(nextTime + interval/2);
-      playOffbeat(nextTime + interval/2);
+    if(offbeatToggle.checked){
+      flashOffbeat(nextTime+interval/2);
+      playOffbeat(nextTime+interval/2);
     }
 
     applyAutoBpm();
     applyBpmCurve();
 
     pulseBeat(nextTime);
-    activeBeatDot(nextTime, beatIndex);
+    activeBeatDot(nextTime,beatIndex);
 
-    const delay = Math.max(0,(nextTime-ctx.currentTime)*1000);
+    const d=Math.max(0,(nextTime-ctx.currentTime)*1000);
     setTimeout(()=>{
-      beatNow.textContent = beatIndex+1;
-      bar.style.width = ((beatIndex+1)/Number(beats.value))*100 + "%";
-    },delay);
+      beatNow.textContent=beatIndex+1;
+      const pct=((beatIndex+1)/Number(beats.value))*100;
+      bar.style.width=pct+"%";
+      if(pct>=99) setTimeout(()=> bar.style.width="0%",60);
+    },d);
 
-    nextTime += interval;
-    beatIndex = (beatIndex + 1) % Number(beats.value);
+    nextTime+=interval;
+    beatIndex=(beatIndex+1)%Number(beats.value);
     loopCounter++;
   }
 
-  timerID = setTimeout(scheduleNotes, 25);
+  timerID=setTimeout(scheduleNotes,20);
 }
 
-// -----------------------------
-// START
-// -----------------------------
 function startMetronome(){
   ensureAudio();
-  if (ctx.state === "suspended") ctx.resume();
+  if(ctx.state==="suspended") ctx.resume();
 
-  running = true;
-  beatIndex = 0;
-  loopCounter = 0;
-  loopPlaying = true;
+  running=true;
+  beatIndex=0;
+  loopCounter=0;
+  loopPlaying=true;
 
   updateBeatGrid(Number(beats.value));
 
-  let startAt = ctx.currentTime + 0.1;
-
-  if (countInToggle.checked){
-    startAt = scheduleCountIn();
-  }
-
-  nextTime = startAt;
+  nextTime=ctx.currentTime+0.1;
   scheduleNotes();
 
-  playToggle.textContent = "■ ストップ";
-  startSessionTimer();
+  playToggle.textContent="■ ストップ";
 }
 
-// -----------------------------
-// STOP
-// -----------------------------
 function stopMetronome(){
-  running = false;
+  running=false;
   clearTimeout(timerID);
   clearInterval(sessionTimerID);
 
-  beatNow.textContent = "–";
-  bar.style.width = "0%";
+  beatNow.textContent="–";
+  bar.style.width="0%";
 
-  playToggle.textContent = "▶ スタート";
+  playToggle.textContent="▶ スタート";
 }
 
-// Panic 強制停止
 function panic(){
   stopMetronome();
-  if (ctx){
+  if(ctx){
     ctx.close();
-    ctx = null;
-    masterGain = null;
+    ctx=null;
+    masterGain=null;
   }
 }
 
-playToggle.onclick = ()=> running ? stopMetronome() : startMetronome();
-panicBtn.onclick = panic;
+playToggle.onclick=()=> running?stopMetronome():startMetronome();
+panicBtn.onclick=panic;
 
-</script>
-
-<script>
 /* ============================================================
-   PART 4 — Visualizer / TapTempo / Preset / Accuracy / WAV Export
-   ============================================================ */
+   PART 4 — Tap / Preset / Accuracy / WAV Export
+=========================================================== */
 
-/* -----------------------------------------
-   TAP TEMPO
------------------------------------------ */
-let tapTimes = [];
-tapBtn.onclick = ()=>{
-  const now = performance.now();
+let tapTimes=[];
+tapBtn.onclick=()=>{
+  const now=performance.now();
   tapTimes.push(now);
+  if(tapTimes.length>5) tapTimes.shift();
 
-  if (tapTimes.length > 5) tapTimes.shift();
-
-  if (tapTimes.length >= 2){
-    const intervals = [];
-    for (let i=1;i<tapTimes.length;i++){
-      intervals.push(tapTimes[i] - tapTimes[i-1]);
+  if(tapTimes.length>=2){
+    const iv=[];
+    for(let i=1;i<tapTimes.length;i++){
+      iv.push(tapTimes[i]-tapTimes[i-1]);
     }
-    const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
-    const result = Math.round(60000 / avg);
-
-    bpm.value = bpmNum.value = result;
+    const avg=iv.reduce((a,b)=>a+b,0)/iv.length;
+    const tap=Math.round(60000/avg);
+    bpm.value=bpmNum.value=tap;
   }
 };
 
-/* -----------------------------------------
-   PRESET SAVE / LOAD
------------------------------------------ */
-function savePreset(){
-  const p = {
-    bpm:bpm.value,
-    beats:beats.value,
-    vol:vol.value,
-    subdiv:subdiv.value,
-    swing:swingToggle.checked,
-    offbeat:offbeatToggle.checked,
-    sound:soundType.value,
-    visual:visualMode.value,
-    pattern:customPattern
-  };
-  const name = prompt("プリセット名を入力してください");
-  if (!name) return;
+/* accuracy */
+let accuracyActive=false;
+let accuracyData=[];
 
-  localStorage.setItem("preset_"+name, JSON.stringify(p));
-
-  const opt = document.createElement("option");
-  opt.value = "preset_"+name;
-  opt.textContent = name;
-  presetList.appendChild(opt);
-}
-
-presetSave.onclick = savePreset;
-
-presetLoad.onclick = ()=>{
-  const key = presetList.value;
-  if (key === "0") return;
-
-  const p = JSON.parse(localStorage.getItem(key)||"null");
-  if (!p) return;
-
-  bpm.value = bpmNum.value = p.bpm;
-  beats.value = beatsNum.value = p.beats;
-  vol.value = volNum.value = p.vol;
-  subdiv.value = p.subdiv;
-  swingToggle.checked = p.swing;
-  offbeatToggle.checked = p.offbeat;
-  soundType.value = p.sound;
-  visualMode.value = p.visual;
-
-  customPattern = p.pattern;
-  if (patternSelect.value === "custom") buildCustomPatternUI();
+accuracyStart.onclick=()=>{
+  accuracyActive=true;
+  accuracyData=[];
+  accuracyResult.textContent="計測中… Spaceキーで拍に合わせてください";
 };
 
-/* -----------------------------------------
-   ACCURACY (リズム正確さ測定)
------------------------------------------ */
-let accuracyActive = false;
-let accuracyData = [];
-
-accuracyStart.onclick = ()=>{
-  accuracyActive = true;
-  accuracyData = [];
-  accuracyResult.textContent = "計測中… Spaceキーで拍に合わせてください";
+accuracyReset.onclick=()=>{
+  accuracyActive=false;
+  accuracyData=[];
+  accuracyResult.textContent="（Spaceキーで測定）";
 };
 
-accuracyReset.onclick = ()=>{
-  accuracyActive = false;
-  accuracyData = [];
-  accuracyResult.textContent = "（Space キーで測定）";
-};
+document.addEventListener("keydown",e=>{
+  if(e.code!=="Space") return;
+  if(!accuracyActive) return;
 
-document.addEventListener("keydown", e=>{
-  if (e.code !== "Space") return;
-  if (!accuracyActive) return;
+  const t=ctx?ctx.currentTime:0;
+  const interval=60/Number(bpm.value);
+  const idx=Math.round((t-nextTime)/interval);
+  const nearest=nextTime+idx*interval;
 
-  const t = ctx ? ctx.currentTime : 0;
-  const interval = 60 / Number(bpm.value);
-
-  const idx = Math.round((t - nextTime) / interval);
-  const nearest = nextTime + idx * interval;
-
-  const diff = (t - nearest) * 1000;
+  const diff=(t-nearest)*1000;
   accuracyData.push(diff);
 
-  const avg = accuracyData.reduce((a,b)=>a+b,0)/accuracyData.length;
-  const abs = Math.abs(avg);
+  const avg=accuracyData.reduce((a,b)=>a+b,0)/accuracyData.length;
+  const absAvg=Math.abs(avg);
 
-  accuracyResult.textContent =
-    `${accuracyData.length} 回測定 — 平均誤差: ${avg.toFixed(1)}ms（絶対: ${abs.toFixed(1)}ms）`;
+  accuracyResult.textContent=
+  `${accuracyData.length} 回測定 — 平均誤差: ${avg.toFixed(1)}ms（絶対: ${absAvg.toFixed(1)}ms）`;
 });
 
-/* -----------------------------------------
-   VISUALIZER — SWEEP
------------------------------------------ */
-let sweepCanvas = null;
-let sweepCtx = null;
-
-function initSweep(){
-  if (sweepCanvas) return;
-
-  sweepCanvas = document.createElement("canvas");
-  sweepCanvas.id = "sweepCanvas";
-  sweepCanvas.style.width="100%";
-  sweepCanvas.style.height="140px";
-  sweepCanvas.style.marginTop="12px";
-  document.querySelector(".card").appendChild(sweepCanvas);
-
-  sweepCtx = sweepCanvas.getContext("2d");
-
-  function resize(){
-    sweepCanvas.width = sweepCanvas.clientWidth;
-    sweepCanvas.height = sweepCanvas.clientHeight;
-  }
-  resize();
-  window.addEventListener("resize", resize);
-}
-
-function drawSweep(time){
-  if (visualMode.value !== "sweep") return;
-  if (!sweepCanvas) return;
-
-  const delay = Math.max(0,(time-ctx.currentTime)*1000);
-
-  setTimeout(()=>{
-    const w = sweepCanvas.width;
-    const h = sweepCanvas.height;
-
-    sweepCtx.fillStyle = "rgba(0,0,0,0.12)";
-    sweepCtx.fillRect(0,0,w,h);
-
-    sweepCtx.fillStyle = "#7da7ff";
-    const x = Math.random()*w;
-    sweepCtx.fillRect(x,0,4,h);
-  },delay);
-}
-
-/* -----------------------------------------
-   VISUALIZER — BARS
------------------------------------------ */
-function initBars(){
-  let barsArea = document.getElementById("barsArea");
-
-  if (!barsArea){
-    barsArea = document.createElement("div");
-    barsArea.id="barsArea";
-    barsArea.style.display="flex";
-    barsArea.style.gap="8px";
-    barsArea.style.marginTop="12px";
-    barsArea.style.height="60px";
-    document.querySelector(".card").appendChild(barsArea);
-  }
-
-  barsArea.innerHTML = "";
-
-  for (let i=0; i<Number(beats.value); i++){
-    const b = document.createElement("div");
-    b.className="barBeat";
-    b.style.flex="1";
-    b.style.borderRadius="6px";
-    b.style.background="#e1e5ef";
-    b.style.transition="0.1s";
-    barsArea.appendChild(b);
-  }
-}
-
-function triggerBars(time, idx){
-  if (visualMode.value !== "bars") return;
-
-  const bars = document.getElementById("barsArea").children;
-  const delay = Math.max(0,(time-ctx.currentTime)*1000);
-
-  setTimeout(()=>{
-    [...bars].forEach((b,i)=>
-      b.style.background = (i===idx ? "#7da7ff" : "#e1e5ef")
-    );
-  }, delay);
-}
-
-/* -----------------------------------------
-   VISUAL MODE CHANGE
------------------------------------------ */
-visualMode.onchange = ()=>{
-  if (visualMode.value==="pulse"){
-    pulse.style.display="block";
-    document.getElementById("sweepCanvas")?.style.setProperty("display","none");
-    document.getElementById("barsArea")?.style.setProperty("display","none");
-  }
-  else if (visualMode.value==="sweep"){
-    pulse.style.display="none";
-    initSweep();
-    document.getElementById("sweepCanvas").style.display="block";
-    document.getElementById("barsArea")?.style.setProperty("display","none");
-  }
-  else if (visualMode.value==="bars"){
-    pulse.style.display="none";
-    initBars();
-    document.getElementById("sweepCanvas")?.style.setProperty("display","none");
-    document.getElementById("barsArea").style.display="block";
-  } 
-  else {
-    pulse.style.display="none";
-    document.getElementById("sweepCanvas")?.style.setProperty("display","none");
-    document.getElementById("barsArea")?.style.setProperty("display","none");
-  }
-};
-
-/* -----------------------------------------
-   WAV Export (クリックトラック作成)
------------------------------------------ */
-exportWav.onclick = async ()=>{
-  if (!ctx) ensureAudio();
-
-  const bpmVal = Number(bpm.value);
-  const interval = 60/bpmVal;
-  const totalBeats = 16;
-
-  const sampleRate = 44100;
-  const length = Math.ceil(sampleRate * interval * totalBeats);
-  const buffer = new Float32Array(length);
-
-  for (let i=0; i<totalBeats; i++){
-    const t = i * interval;
-    const idx = Math.floor(t * sampleRate);
-
-    for (let j=0;j<120;j++){
-      if (idx+j < length){
-        buffer[idx+j] += (i%Number(beats.value)===0 ? 1 : -0.5) * Math.exp(-j/50);
-      }
-    }
-  }
-
-  const wav = encodeWAV(buffer, sampleRate);
-
-  const blob = new Blob([wav], {type:"audio/wav"});
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "clicktrack.wav";
-  a.click();
-
-  URL.revokeObjectURL(url);
-};
-
-function encodeWAV(samples, sampleRate){
-  const buffer = new ArrayBuffer(44 + samples.length*2);
-  const view = new DataView(buffer);
-
-  function str(o,s){ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); }
-
-  str(0,"RIFF");
-  view.setUint32(4,36 + samples.length*2,true);
-  str(8,"WAVE");
-  str(12,"fmt ");
+/* WAV export */
+function encodeWAV(samples,sampleRate){
+  const buffer=new ArrayBuffer(44+samples.length*2);
+  const view=new DataView(buffer);
+  function writeStr(o,s){ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); }
+  writeStr(0,"RIFF");
+  view.setUint32(4,36+samples.length*2,true);
+  writeStr(8,"WAVE");
+  writeStr(12,"fmt ");
   view.setUint32(16,16,true);
   view.setUint16(20,1,true);
   view.setUint16(22,1,true);
@@ -1252,219 +771,121 @@ function encodeWAV(samples, sampleRate){
   view.setUint32(28,sampleRate*2,true);
   view.setUint16(32,2,true);
   view.setUint16(34,16,true);
-  str(36,"data");
+  writeStr(36,"data");
   view.setUint32(40,samples.length*2,true);
 
   let offset=44;
-
   for(let i=0;i<samples.length;i++){
     let s=Math.max(-1,Math.min(1,samples[i]));
-    view.setInt16(offset, s*0x7fff, true);
+    view.setInt16(offset,s*0x7fff,true);
     offset+=2;
   }
-
   return buffer;
 }
 
-/* -----------------------------------------
-   Practice History
------------------------------------------ */
-showHistory.onclick = ()=>{
-  const h = JSON.parse(localStorage.getItem("practiceHistory")||"[]");
-  const area = document.getElementById("historyArea");
+exportWav.onclick=()=>{
+  if(!ctx) ensureAudio();
+  const bpmVal=Number(bpm.value);
+  const interval=60/bpmVal;
+  const total=16;
+  const sampleRate=44100;
+  const len=Math.ceil(sampleRate*interval*total);
+  const buffer=new Float32Array(len);
 
-  area.style.display = (area.style.display==="none" ? "block":"none");
+  for(let i=0;i<total;i++){
+    const t=i*interval;
+    const idx=Math.floor(t*sampleRate);
+    for(let j=0;j<100;j++){
+      if(idx+j<len){
+        buffer[idx+j]+= (i%Number(beats.value)===0?1:-0.5) * Math.exp(-j/40);
+      }
+    }
+  }
 
-  area.innerHTML = h.map(item =>
-    `<div>${item.time} — BPM:${item.bpm}, ${item.min}分練習</div>`
-  ).join("");
+  const wav=encodeWAV(buffer,sampleRate);
+  const blob=new Blob([wav],{type:"audio/wav"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="clicktrack.wav";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+/* History */
+showHistory.onclick=()=>{
+  const h=JSON.parse(localStorage.getItem("practiceHistory")||"[]");
+  historyArea.style.display=historyArea.style.display==="none"?"block":"none";
+  historyArea.innerHTML=h.map(it=>`<div>${it.time} — BPM:${it.bpm}, ${it.min}分</div>`).join("");
 };
 
 function logPractice(){
-  const h = JSON.parse(localStorage.getItem("practiceHistory")||"[]");
-
+  const h=JSON.parse(localStorage.getItem("practiceHistory")||"[]");
   h.push({
-    time: new Date().toLocaleString(),
-    bpm: Number(bpm.value),
-    min: Number(sessionTimer.value)/60
+    time:new Date().toLocaleString(),
+    bpm:Number(bpm.value),
+    min:Number(sessionTimer.value)/60
   });
-
-  localStorage.setItem("practiceHistory", JSON.stringify(h));
+  localStorage.setItem("practiceHistory",JSON.stringify(h));
 }
 
-</script>
-
-
-  <script>
 /* ============================================================
-   PART 5 — Final Integration / Init / Dark Mode / Stability
-   ============================================================ */
-
-/* -----------------------------------------
-   ダークモード
------------------------------------------ */
-themeToggle.onclick = () => {
+   PART 5 — Init / Events / Dark Mode / Stability
+=========================================================== */
+themeToggle.onclick=()=>{
   document.body.classList.toggle("dark");
-
-  themeToggle.textContent =
-    document.body.classList.contains("dark")
-      ? "☀ ライトモード"
-      : "🌙 ダークモード";
+  themeToggle.textContent=
+    document.body.classList.contains("dark")?"☀ ライトモード":"🌙 ダークモード";
 };
 
-/* -----------------------------------------
-   拍子 변경 시 UI 업데이트
------------------------------------------ */
-beats.oninput = () => {
-  beatsNum.value = beats.value;
+beats.oninput=()=>{
+  beatsNum.value=beats.value;
   updateBeatGrid(Number(beats.value));
-
-  if (patternSelect.value === "custom") {
-    buildCustomPatternUI();
-  }
-
-  if (visualMode.value === "bars") {
-    initBars();
-  }
 };
-
-beatsNum.oninput = () => {
-  beats.value = beatsNum.value;
+beatsNum.oninput=()=>{
+  beats.value=beatsNum.value;
   updateBeatGrid(Number(beats.value));
+};
 
-  if (patternSelect.value === "custom") {
-    buildCustomPatternUI();
+vol.oninput=()=>{ volNum.value=vol.value; if(masterGain) masterGain.gain.value=vol.value; };
+volNum.oninput=()=>{ vol.value=volNum.value; if(masterGain) masterGain.gain.value=vol.value; };
+
+bpm.oninput=()=> bpmNum.value=bpm.value;
+bpmNum.oninput=()=> bpm.value=bpmNum.value;
+
+patternSelect.onchange=()=>{
+  if(patternSelect.value==="custom"){
+    customPatternArea.style.display="block";
+    buildCustom();
+  }else customPatternArea.style.display="none";
+};
+
+function buildCustom(){
+  patternButtons.innerHTML="";
+  const n=Number(beats.value);
+  customPattern=new Array(n).fill(false);
+  for(let i=0;i<n;i++){
+    const b=document.createElement("div");
+    b.className="patternBtn";
+    b.textContent=i+1;
+    b.dataset.index=i;
+    b.onclick=()=>{
+      const idx=Number(b.dataset.index);
+      customPattern[idx]=!customPattern[idx];
+      b.classList.toggle("active",customPattern[idx]);
+    };
+    patternButtons.appendChild(b);
   }
+}
 
-  if (visualMode.value === "bars") {
-    initBars();
-  }
-};
+visualMode.onchange=()=>{};
 
-/* -----------------------------------------
-   Volume
------------------------------------------ */
-vol.oninput = () => {
-  volNum.value = vol.value;
-  if (masterGain) masterGain.gain.value = vol.value;
-};
-volNum.oninput = () => {
-  vol.value = volNum.value;
-  if (masterGain) masterGain.gain.value = vol.value;
-};
+window.addEventListener("blur",()=>{ if(ctx && ctx.state==="running") ctx.suspend(); });
+window.addEventListener("focus",()=>{ if(ctx && ctx.state==="suspended") ctx.resume(); });
 
-/* -----------------------------------------
-   BPM sync
------------------------------------------ */
-bpm.oninput = () => (bpmNum.value = bpm.value);
-bpmNum.oninput = () => (bpm.value = bpmNum.value);
-
-/* -----------------------------------------
-   パターン選択 시 UI 표시
------------------------------------------ */
-patternSelect.onchange = () => {
-  if (patternSelect.value === "custom") {
-    customPatternArea.style.display = "block";
-    buildCustomPatternUI();
-  } else {
-    customPatternArea.style.display = "none";
-  }
-};
-
-/* -----------------------------------------
-   Loop UI
------------------------------------------ */
-loopMode.onchange = () => {
-  if (loopMode.value === "custom") {
-    customLoopArea.style.display = "block";
-  } else {
-    customLoopArea.style.display = "none";
-  }
-};
-
-/* -----------------------------------------
-   Visualizer 초기화 (Pulse / Sweep / Bars)
------------------------------------------ */
-visualMode.onchange = () => {
-  if (visualMode.value === "pulse") {
-    pulse.style.display = "block";
-    document.getElementById("sweepCanvas")?.style.setProperty("display", "none");
-    document.getElementById("barsArea")?.style.setProperty("display", "none");
-  } 
-  else if (visualMode.value === "sweep") {
-    pulse.style.display = "none";
-    initSweep();
-    document.getElementById("sweepCanvas").style.display = "block";
-    document.getElementById("barsArea")?.style.setProperty("display", "none");
-  } 
-  else if (visualMode.value === "bars") {
-    pulse.style.display = "none";
-    initBars();
-    document.getElementById("sweepCanvas")?.style.setProperty("display", "none");
-    document.getElementById("barsArea").style.display = "block";
-  } 
-  else {
-    pulse.style.display = "none";
-    document.getElementById("sweepCanvas")?.style.setProperty("display", "none");
-    document.getElementById("barsArea")?.style.setProperty("display", "none");
-  }
-};
-
-/* -----------------------------------------
-   START / STOP override (history 기록 포함)
------------------------------------------ */
-const originalStart = startMetronome;
-const originalStop = stopMetronome;
-
-startMetronome = function () {
-  originalStart();
-
-  if (visualMode.value === "bars") initBars();
-  if (visualMode.value === "sweep") initSweep();
-};
-
-stopMetronome = function () {
-  originalStop();
-
-  // 練習履歴 保存
-  if (Number(sessionTimer.value) > 0) {
-    logPractice();
-  }
-};
-
-/* -----------------------------------------
-   Preset 목록 로딩
------------------------------------------ */
-(function loadPresets() {
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("preset_")) {
-      const name = key.replace("preset_", "");
-      const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = name;
-      presetList.appendChild(opt);
-    }
-  }
-})();
-
-/* -----------------------------------------
-   초기 BeatGrid 생성
------------------------------------------ */
 updateBeatGrid(Number(beats.value));
 
-/* -----------------------------------------
-   기본 비주얼 모드 실행
------------------------------------------ */
-visualMode.dispatchEvent(new Event("change"));
-
-/* -----------------------------------------
-   Chrome 탭 바꿀 때 오디오 끊김 방지
------------------------------------------ */
-window.addEventListener("blur", () => {
-  if (ctx && ctx.state === "running") ctx.suspend();
-});
-window.addEventListener("focus", () => {
-  if (ctx && ctx.state === "suspended") ctx.resume();
-});
 </script>
+
+</body>
+</html>
