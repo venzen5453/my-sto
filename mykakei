@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 스마트 가계부</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --income-color: #2ecc71;
+            --expense-color: #e74c3c;
+            --bg-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* 헤더: 잔액 표시 */
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 { margin: 0; font-size: 1.2rem; opacity: 0.9; }
+        .total-amount { font-size: 2.5rem; font-weight: 800; margin: 10px 0; }
+        
+        .asset-split {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        /* 입력 섹션 */
+        .input-box {
+            padding: 20px;
+            border-bottom: 8px solid #f0f2f5;
+        }
+
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        input, select {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-plus { background: #e8f5e9; color: var(--income-color); }
+        .btn-minus { background: #ffebee; color: var(--expense-color); }
+        button:active { transform: scale(0.98); }
+
+        /* 내역 리스트 */
+        .list-container { padding: 20px; }
+        .list-title { font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-info { display: flex; flex-direction: column; }
+        .item-main { font-weight: 600; font-size: 1.05rem; }
+        .item-sub { font-size: 0.8rem; color: #888; margin-top: 4px; }
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #eee;
+            margin-right: 5px;
+        }
+
+        .item-amount { font-weight: bold; font-size: 1.1rem; }
+        .income { color: var(--income-color); }
+        .expense { color: var(--expense-color); }
+
+        .delete-btn {
+            background: none;
+            color: #ccc;
+            padding: 5px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1 id="today-date">2026년 2월 5일</h1>
+        <div class="total-amount" id="total-balance">0원</div>
+        <div class="asset-split">
+            <div>💵 현금: <span id="cash-balance">0</span></div>
+            <div>💳 카드: <span id="card-balance">0</span></div>
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-row">
+            <input type="number" id="amount-input" placeholder="금액 입력">
+            <select id="category-input">
+                <option value="식비">🍔 식비</option>
+                <option value="교통">🚌 교통</option>
+                <option value="쇼핑">🛍️ 쇼핑</option>
+                <option value="의료">🏥 의료</option>
+                <option value="월급">💰 수입</option>
+            </select>
+        </div>
+        <div class="button-grid">
+            <button class="btn-plus" onclick="handleTransaction('plus', 'cash')">현금 입금</button>
+            <button class="btn-plus" onclick="handleTransaction('plus', 'card')">카드 입금</button>
+            <button class="btn-minus" onclick="handleTransaction('minus', 'cash')">현금 출금</button>
+            <button class="btn-minus" onclick="handleTransaction('minus', 'card')">카드 출금</button>
+        </div>
+    </div>
+
+    <div class="list-container">
+        <div class="list-title">
+            <span>최근 내역</span>
+            <span style="font-size: 0.8rem; color: #aaa;">최신순</span>
+        </div>
+        <div id="history-list">
+            </div>
+    </div>
+</div>
+
+<script>
+    // 1. 데이터 상태 관리
+    let state = JSON.parse(localStorage.getItem('myLedgerData')) || {
+        cash: 0,
+        card: 0,
+        history: []
+    };
+
+    // 오늘 날짜 표시
+    document.getElementById('today-date').innerText = new Date().toLocaleDateString('ko-KR', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+    });
+
+    // 2. 화면 업데이트 함수
+    function updateUI() {
+        document.getElementById('cash-balance').innerText = state.cash.toLocaleString() + "원";
+        document.getElementById('card-balance').innerText = state.card.toLocaleString() + "원";
+        document.getElementById('total-balance').innerText = (state.cash + state.card).toLocaleString() + "원";
+
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = state.history.map((item, index) => `
+            <div class="history-item">
+                <div class="item-info">
+                    <div class="item-main">${item.category}</div>
+                    <div class="item-sub">
+                        <span class="tag">${item.method}</span>
+                        <button class="delete-btn" onclick="deleteItem(${index})">삭제</button>
+                    </div>
+                </div>
+                <div class="item-amount ${item.type === 'plus' ? 'income' : 'expense'}">
+                    ${item.type === 'plus' ? '+' : '-'}${item.amount.toLocaleString()}원
+                </div>
+            </div>
+        `).join('');
+
+        localStorage.setItem('myLedgerData', JSON.stringify(state));
+    }
+
+    // 3. 입출금 처리 함수
+    function handleTransaction(type, method) {
+        const amountInput = document.getElementById('amount-input');
+        const categoryInput = document.getElementById('category-input');
+        const amount = parseInt(amountInput.value);
+
+        if (!amount || amount <= 0) {
+            alert("올바른 금액을 입력하세요.");
+            return;
+        }
+
+        // 잔액 계산
+        if (method === 'cash') {
+            state.cash += (type === 'plus' ? amount : -amount);
+        } else {
+            state.card += (type === 'plus' ? amount : -amount);
+        }
+
+        // 내역 추가
+        state.history.unshift({
+            type,
+            method: method === 'cash' ? '현금' : '카드',
+            category: categoryInput.value,
+            amount: amount,
+            date: new Date().getTime()
+        });
+
+        amountInput.value = '';
+        updateUI();
+    }
+
+    // 4. 내역 삭제 기능
+    function deleteItem(index) {
+        if (!confirm("이 내역을 삭제하시겠습니까? 잔액도 복구됩니다.")) return;
+        
+        const item = state.history[index];
+        // 삭제 시 역계산으로 잔액 복구
+        if (item.method === '현금') {
+            state.cash += (item.type === 'plus' ? -item.amount : item.amount);
+        } else {
+            state.card += (item.type === 'plus' ? -item.amount : item.amount);
+        }
+
+        state.history.splice(index, 1);
+        updateUI();
+    }
+
+    // 초기 실행
+    updateUI();
+</script>
+
+</body>
+</html>
