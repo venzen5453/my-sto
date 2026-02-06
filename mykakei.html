@@ -2,8 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>심플 스마트 가계부</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="스마트가계부">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2654/2654274.png">
+    
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -31,6 +37,15 @@
             background-color: var(--bg-color);
             margin: 0; padding: 0; display: flex; justify-content: center;
             color: var(--text-main); transition: 0.3s;
+            /* [중요] 모든 터치 동작에서 기본 브라우저 동작(줌 등)을 제한합니다 */
+            touch-action: manipulation;
+            -webkit-text-size-adjust: none;
+            overflow-x: hidden;
+        }
+
+        /* 버튼이나 입력창에서 터치 지연 및 줌 현상 방지 */
+        button, input, select, textarea {
+            touch-action: manipulation;
         }
 
         .app-container {
@@ -39,8 +54,14 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
         }
 
-        /* 헤더 (아까 그 디자인 그대로) */
-        .header { background: var(--header-bg); color: white; padding: 25px 20px; text-align: center; }
+        /* 아이폰 상단 여백 (노치 대응) */
+        .header { 
+            background: var(--header-bg); 
+            color: white; 
+            padding: calc(env(safe-area-inset-top) + 25px) 20px 25px 20px; 
+            text-align: center; 
+        }
+
         .date-nav { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
         .date-nav button { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; opacity: 0.7; }
         .date-nav input { background: rgba(255,255,255,0.1); border: none; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; color-scheme: dark; }
@@ -58,7 +79,6 @@
         .asset-item { flex: 1; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
         .asset-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; display: block; }
 
-        /* 탭 및 입력 UI */
         .tab-content { display: none; padding: 20px; }
         .tab-content.active { display: block; }
 
@@ -67,47 +87,68 @@
             width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 12px;
             font-size: 1.8rem; font-weight: bold; text-align: center; margin-bottom: 15px;
             box-sizing: border-box; outline: none; background: var(--bg-color); color: var(--text-main);
+            /* 입력창 포커스 시 줌 방지 */
+            font-size: 16px !important; 
         }
-        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .button-grid button { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* 하단 내비게이션 */
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .button-grid button { 
+            padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; 
+            -webkit-user-select: none; /* 텍스트 선택 방지 */
+        }
+
+        /* 하단 내비게이션 (아이폰 하단 홈 바 대응) */
         .nav-bar {
             position: fixed; bottom: 0; width: 100%; max-width: 480px;
-            height: 70px; background: var(--card-bg); border-top: 1px solid var(--border-color);
+            height: calc(70px + env(safe-area-inset-bottom)); 
+            background: var(--card-bg); border-top: 1px solid var(--border-color);
             display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .nav-item { border: none; background: none; color: #888; font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .nav-item.active { color: var(--primary-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; }
 
-        /* 리스트 및 삭제 버튼 */
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
         .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
         .tag-cash { background: #fff9db; color: #f08c00; }
         .tag-card { background: #e7f5ff; color: #1971c2; }
         .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.75rem; }
 
-        /* 검색박스 */
         .search-container { background: var(--bg-color); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .search-container input { flex: 1; border: none; background: none; outline: none; font-size: 1rem; color: var(--text-main); }
 
-        /* 모달 */
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
         .modal { background: var(--card-bg); width: 85%; border-radius: 20px; padding: 25px; }
         .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .cat-btn { padding: 10px 5px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-color); color: var(--text-main); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .cat-btn { padding: 10px 5px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-color); color: var(--text-main); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; -webkit-user-select: none; }
         .cat-btn.active { background: var(--primary-color); color: white; }
     </style>
 </head>
 <body>
+    <script>
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault(); // 핀치 줌 방지
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault(); // 더블 탭 줌 방지
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
 
 <div class="app-container">
     <div id="modal-overlay">
         <div class="modal">
             <div style="font-weight: bold; margin-bottom: 20px; text-align: center;">분류 선택</div>
             <div class="category-grid" id="category-selector"></div>
-            <input type="text" id="note-input" class="main-input" style="font-size:1rem; text-align:left;" placeholder="상세 메모 (선택)">
+            <input type="text" id="note-input" class="main-input" style="font-size:1rem !important; text-align:left;" placeholder="상세 메모 (선택)">
             <div style="display:flex; gap:10px;">
                 <button onclick="closeModal()" style="flex:1; padding:12px; border:none; background:#eee; border-radius:10px;">취소</button>
                 <button onclick="confirmTransaction()" style="flex:1; padding:12px; border:none; background:var(--primary-color); color:white; border-radius:10px; font-weight:bold;">저장</button>
