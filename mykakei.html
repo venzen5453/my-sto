@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 프리미엄 가계부 (통계 & 백업)</title>
+    <title>심플 자동 가계부</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -26,26 +26,25 @@
             overflow: hidden; position: relative; min-height: 90vh;
         }
 
-        /* 헤더 & 대시보드 */
+        /* 헤더 */
         .header { background: #2c3e50; color: white; padding: 25px 20px; text-align: center; }
-        .date-selector input {
-            background: rgba(255,255,255,0.1); border: none; color: white;
-            padding: 8px 15px; border-radius: 20px; font-size: 1rem; margin-bottom: 10px;
-        }
-        .total-amount { font-size: 2.5rem; font-weight: 800; margin: 5px 0; }
+        
+        .date-nav { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+        .date-nav button { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; opacity: 0.7; }
+        .date-nav input { background: rgba(255,255,255,0.1); border: none; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; color-scheme: dark; }
+
+        .total-amount { font-size: 2.8rem; font-weight: 800; margin: 10px 0; }
         
         .monthly-summary {
             display: flex; background: rgba(0,0,0,0.2); border-radius: 15px;
-            margin: 15px 0; padding: 12px; font-size: 0.85rem; justify-content: space-around;
+            margin: 15px 0; padding: 15px; font-size: 0.85rem; justify-content: space-around;
         }
-        .summary-box span { display: block; opacity: 0.8; margin-bottom: 3px; }
-        .summary-box b { font-size: 1rem; }
+        .summary-box span { display: block; opacity: 0.7; margin-bottom: 3px; }
+        .summary-box b { font-size: 1.1rem; }
 
         .asset-split { display: flex; justify-content: space-around; gap: 10px; }
         .asset-item { flex: 1; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        .asset-label { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block; }
-        #cash-balance { color: var(--cash-accent); }
-        #card-balance { color: var(--card-accent); }
+        .asset-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; display: block; }
 
         /* 입력 섹션 */
         .input-box { padding: 20px; border-bottom: 8px solid #f0f2f5; }
@@ -59,32 +58,22 @@
         .btn-plus { background: #e8f5e9; color: var(--income-color); }
         .btn-minus { background: #ffebee; color: var(--expense-color); }
 
-        /* 통계 섹션 */
-        .stats-section { padding: 20px; border-bottom: 8px solid #f0f2f5; }
-        .chart-container { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
-        .chart-bar-wrap { flex: 1; background: #eee; height: 12px; border-radius: 6px; overflow: hidden; }
-        .chart-bar { height: 100%; background: var(--expense-color); width: 0%; transition: 0.5s; }
-
         /* 내역 리스트 */
         .history-section { padding: 20px; }
-        .history-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .history-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #333; }
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f1f1; }
         .item-info { display: flex; flex-direction: column; gap: 4px; }
         .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
         .tag-cash { background: #fff9db; color: #f08c00; }
         .tag-card { background: #e7f5ff; color: #1971c2; }
-        .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; }
-
-        /* 설정 (백업) */
-        .settings-row { padding: 15px 20px; display: flex; gap: 10px; background: #fdfdfd; }
-        .btn-small { flex: 1; padding: 8px; font-size: 0.75rem; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer; }
+        .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.75rem; }
 
         /* 모달 */
         #modal-overlay {
             display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center;
         }
-        .modal { background: white; width: 90%; border-radius: 20px; padding: 25px; box-sizing: border-box; }
+        .modal { background: white; width: 85%; border-radius: 20px; padding: 25px; }
         .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .cat-btn { padding: 10px 5px; border: 1px solid #eee; border-radius: 10px; background: #f9f9f9; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .cat-btn.active { background: var(--primary-color); color: white; }
@@ -95,36 +84,33 @@
 <div class="app-container">
     <div id="modal-overlay">
         <div class="modal">
-            <div id="modal-header-text" style="font-weight: bold; margin-bottom: 20px; text-align: center;">내역 입력</div>
+            <div id="modal-header-text" style="font-weight: bold; margin-bottom: 20px; text-align: center;">분류 선택</div>
             <div class="category-grid" id="category-selector"></div>
-            <input type="text" id="note-input" class="modal-input" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:10px; margin-bottom:20px;" placeholder="메모 입력">
+            <input type="text" id="note-input" style="width:100%; padding:12px; box-sizing:border-box; border:1px solid #ddd; border-radius:10px; margin-bottom:20px;" placeholder="상세 메모 (선택)">
             <div style="display:flex; gap:10px;">
-                <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:10px; border:none; background:#eee;">취소</button>
-                <button onclick="confirmTransaction()" style="flex:1; padding:12px; border-radius:10px; border:none; background:var(--primary-color); color:white; font-weight:bold;">저장</button>
+                <button onclick="closeModal()" style="flex:1; padding:12px; border:none; background:#eee; border-radius:10px;">취소</button>
+                <button onclick="confirmTransaction()" style="flex:1; padding:12px; border:none; background:var(--primary-color); color:white; border-radius:10px; font-weight:bold;">저장</button>
             </div>
         </div>
     </div>
 
     <div class="header">
-        <div class="date-selector"><input type="date" id="date-picker" onchange="changeDate()"></div>
+        <div class="date-nav">
+            <button onclick="moveDate(-1)">◀</button>
+            <input type="date" id="date-picker" onchange="updateUI()">
+            <button onclick="moveDate(1)">▶</button>
+        </div>
         <div class="total-amount" id="total-balance">¥0</div>
         
         <div class="monthly-summary">
-            <div class="summary-box"><span>이번 달 수입</span><b id="month-in" style="color:#2ecc71">¥0</b></div>
-            <div class="summary-box"><span>이번 달 지출</span><b id="month-out" style="color:#ff6b6b">¥0</b></div>
+            <div class="summary-box"><span>한 달 수입</span><b id="month-in" style="color:#2ecc71">¥0</b></div>
+            <div class="summary-box"><span>한 달 지출</span><b id="month-out" style="color:#ff6b6b">¥0</b></div>
         </div>
 
         <div class="asset-split">
-            <div class="asset-item"><span class="asset-label" style="color:var(--cash-accent)">현금 잔액</span><div id="cash-balance">¥0</div></div>
-            <div class="asset-item"><span class="asset-label" style="color:var(--card-accent)">카드 잔액</span><div id="card-balance">¥0</div></div>
+            <div class="asset-item"><span class="asset-label" style="color:var(--cash-accent)">현금 잔액</span><div id="cash-balance" style="font-weight:800; font-size:1.3rem; color:var(--cash-accent)">¥0</div></div>
+            <div class="asset-item"><span class="asset-label" style="color:var(--card-accent)">카드 잔액</span><div id="card-balance" style="font-weight:800; font-size:1.3rem; color:var(--card-accent)">¥0</div></div>
         </div>
-    </div>
-
-    <div class="settings-row">
-        <button class="btn-small" onclick="exportData()">📦 데이터 백업</button>
-        <button class="btn-small" onclick="document.getElementById('file-input').click()">📁 복구</button>
-        <button class="btn-small" onclick="resetData()" style="color:red">🔄 초기화</button>
-        <input type="file" id="file-input" style="display:none" onchange="importData(event)">
     </div>
 
     <div class="input-box">
@@ -137,54 +123,48 @@
         </div>
     </div>
 
-    <div class="stats-section" id="stats-area">
-        <div style="font-size:0.9rem; font-weight:bold; color:#666;">지출 비중</div>
-        <div class="chart-container">
-            <span id="top-cat-name" style="font-size:0.8rem; min-width:60px;">내역 없음</span>
-            <div class="chart-bar-wrap"><div id="chart-bar" class="chart-bar"></div></div>
-            <span id="top-cat-percent" style="font-size:0.8rem; font-weight:bold;">0%</span>
-        </div>
-    </div>
-
     <div class="history-section">
-        <div class="history-title">오늘의 내역 <span id="item-count" style="font-size:0.8rem; color:#aaa; font-weight:normal;">0건</span></div>
+        <div class="history-title">오늘의 거래 내역</div>
         <div id="history-list"></div>
     </div>
 </div>
 
 <script>
     const categories = {
-        plus: [{name:'월급',icon:'💰'},{name:'용돈',icon:'🎁'},{name:'이월',icon:'📅'},{name:'부수입',icon:'📈'},{name:'금융',icon:'🏦'},{name:'기타',icon:'✨'}],
-        minus: [{name:'식비',icon:'🍔'},{name:'교통비',icon:'🚌'},{name:'여가/취미',icon:'🎮'},{name:'쇼핑',icon:'🛍️'},{name:'의료',icon:'🏥'},{name:'주거/통신',icon:'🏠'},{name:'교육',icon:'📚'},{name:'경조사',icon:'💌'},{name:'기타',icon:'✨'}]
+        plus: [{name:'월급',icon:'💰'},{name:'용돈',icon:'🎁'},{name:'부수입',icon:'📈'},{name:'금융',icon:'🏦'},{name:'기타',icon:'✨'}],
+        minus: [{name:'식비',icon:'🍔'},{name:'교통비',icon:'🚌'},{name:'여가',icon:'🎮'},{name:'쇼핑',icon:'🛍️'},{name:'의료',icon:'🏥'},{name:'기타',icon:'✨'}]
     };
 
-    let state = JSON.parse(localStorage.getItem('myLedgerData_V9')) || { cash: 0, card: 0, dailyHistory: {} };
-    let currentDate = "";
+    let state = JSON.parse(localStorage.getItem('smartLedgerData_V11')) || { cash: 0, card: 0, dailyHistory: {} };
     let currentTransaction = null;
     let selectedCategory = "";
 
     function init() {
-        currentDate = new Date().toISOString().split('T')[0];
-        document.getElementById('date-picker').value = currentDate;
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date-picker').value = today;
         updateUI();
     }
 
-    function changeDate() { currentDate = document.getElementById('date-picker').value; updateUI(); }
+    function moveDate(offset) {
+        const dateInput = document.getElementById('date-picker');
+        let d = new Date(dateInput.value);
+        d.setDate(d.getDate() + offset);
+        dateInput.value = d.toISOString().split('T')[0];
+        updateUI();
+    }
 
     function openModal(type, method) {
         const amt = parseInt(document.getElementById('amount-input').value);
         if(!amt || amt <= 0) return alert("금액을 입력하세요.");
         currentTransaction = { type, method, amount: amt };
         selectedCategory = "";
-        document.getElementById('note-input').value = "";
-        document.getElementById('modal-header-text').innerText = `${method==='cash'?'현금':'카드'} ${type==='plus'?'입금':'출금'} (¥${amt.toLocaleString()})`;
         
         const selector = document.getElementById('category-selector');
         selector.innerHTML = "";
         categories[type].forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'cat-btn';
-            btn.innerHTML = `<span>${cat.icon}</span>${cat.name}`;
+            btn.innerHTML = `<span style="font-size:1.2rem">${cat.icon}</span>${cat.name}`;
             btn.onclick = () => { document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); selectedCategory = cat.name; };
             selector.appendChild(btn);
         });
@@ -194,13 +174,15 @@
     function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
     function confirmTransaction() {
-        if(!selectedCategory) return alert("카테고리를 선택하세요.");
+        if(!selectedCategory) return alert("분류를 선택하세요.");
         const { type, method, amount } = currentTransaction;
+        const date = document.getElementById('date-picker').value;
+
         if(method === 'cash') state.cash += (type==='plus'? amount : -amount);
         else state.card += (type==='plus'? amount : -amount);
 
-        if(!state.dailyHistory[currentDate]) state.dailyHistory[currentDate] = [];
-        state.dailyHistory[currentDate].unshift({ type, method: method==='cash'?'현금':'카드', category: selectedCategory, note: document.getElementById('note-input').value || selectedCategory, amount });
+        if(!state.dailyHistory[date]) state.dailyHistory[date] = [];
+        state.dailyHistory[date].unshift({ type, method: method==='cash'?'현금':'카드', category: selectedCategory, note: document.getElementById('note-input').value || selectedCategory, amount });
 
         document.getElementById('amount-input').value = '';
         closeModal();
@@ -208,105 +190,59 @@
     }
 
     function updateUI() {
-        // 기본 잔액
+        const activeDate = document.getElementById('date-picker').value;
+        const curMonth = activeDate.substring(0, 7);
+
+        // 상단 잔액
         document.getElementById('cash-balance').innerText = "¥" + state.cash.toLocaleString();
         document.getElementById('card-balance').innerText = "¥" + state.card.toLocaleString();
         const total = state.cash + state.card;
-        document.getElementById('total-balance').innerText = "¥" + total.toLocaleString();
-        document.getElementById('total-balance').style.color = total >= 0 ? "var(--income-color)" : "var(--expense-color)";
+        const totalEl = document.getElementById('total-balance');
+        totalEl.innerText = "¥" + total.toLocaleString();
+        totalEl.style.color = total >= 0 ? "var(--income-color)" : "var(--expense-color)";
 
-        // 이번 달 통계 계산
-        const curMonth = currentDate.substring(0, 7); // YYYY-MM
+        // 한 달 합계 계산
         let mIn = 0, mOut = 0;
-        let catStats = {};
-
         Object.keys(state.dailyHistory).forEach(date => {
             if(date.startsWith(curMonth)) {
                 state.dailyHistory[date].forEach(item => {
                     if(item.type === 'plus') mIn += item.amount;
-                    else {
-                        mOut += item.amount;
-                        catStats[item.category] = (catStats[item.category] || 0) + item.amount;
-                    }
+                    else mOut += item.amount;
                 });
             }
         });
-
         document.getElementById('month-in').innerText = "¥" + mIn.toLocaleString();
         document.getElementById('month-out').innerText = "¥" + mOut.toLocaleString();
 
-        // 지출 차트 업데이트
-        const sortedCats = Object.entries(catStats).sort((a,b) => b[1] - a[1]);
-        if(sortedCats.length > 0 && mOut > 0) {
-            const top = sortedCats[0];
-            const percent = Math.round((top[1] / mOut) * 100);
-            document.getElementById('top-cat-name').innerText = top[0];
-            document.getElementById('top-cat-percent').innerText = percent + "%";
-            document.getElementById('chart-bar').style.width = percent + "%";
-        } else {
-            document.getElementById('top-cat-name').innerText = "내역 없음";
-            document.getElementById('chart-bar').style.width = "0%";
-            document.getElementById('top-cat-percent').innerText = "0%";
-        }
-
-        // 리스트 그리기
+        // 오늘 내역 리스트
         const list = document.getElementById('history-list');
-        const dayData = state.dailyHistory[currentDate] || [];
-        document.getElementById('item-count').innerText = `${dayData.length}건`;
+        const dayData = state.dailyHistory[activeDate] || [];
         list.innerHTML = dayData.length ? dayData.map((item, i) => `
             <div class="history-item">
                 <div class="item-info">
-                    <b class="item-category">${item.category}</b>
-                    <span class="item-note">${item.note}</span>
-                    <div style="margin-top:5px"><span class="tag ${item.method==='현금'?'tag-cash':'tag-card'}">${item.method}</span><button class="delete-btn" onclick="deleteItem(${i})">삭제</button></div>
+                    <b style="font-size:1.05rem;">${item.category}</b>
+                    <span style="font-size:0.85rem; color:#888;">${item.note}</span>
+                    <div style="margin-top:5px">
+                        <span class="tag ${item.method==='현금'?'tag-cash':'tag-card'}">${item.method}</span>
+                        <button class="delete-btn" onclick="deleteItem('${activeDate}', ${i})">삭제</button>
+                    </div>
                 </div>
-                <div style="font-size:1.1rem; font-weight:800; color:${item.type==='plus'?'var(--income-color)':'var(--expense-color)'}">
+                <div style="font-weight:800; font-size:1.15rem; color:${item.type==='plus'?'var(--income-color)':'var(--expense-color)'}">
                     ${item.type==='plus'?'+':'-'}¥${item.amount.toLocaleString()}
                 </div>
             </div>
-        `).join('') : '<p style="text-align:center; color:#ccc; padding:30px;">기록이 없습니다.</p>';
+        `).join('') : '<p style="text-align:center; color:#ccc; padding:50px 0;">이 날의 거래 내역이 없습니다.</p>';
 
-        localStorage.setItem('myLedgerData_V9', JSON.stringify(state));
+        localStorage.setItem('smartLedgerData_V11', JSON.stringify(state));
     }
 
-    function deleteItem(idx) {
-        if(!confirm("삭제할까요?")) return;
-        const item = state.dailyHistory[currentDate][idx];
+    function deleteItem(date, idx) {
+        if(!confirm("이 내역을 삭제할까요?")) return;
+        const item = state.dailyHistory[date][idx];
         if(item.method === '현금') state.cash += (item.type==='plus' ? -item.amount : item.amount);
         else state.card += (item.type==='plus' ? -item.amount : item.amount);
-        state.dailyHistory[currentDate].splice(idx, 1);
+        state.dailyHistory[date].splice(idx, 1);
         updateUI();
-    }
-
-    // 백업 및 복구 기능
-    function exportData() {
-        const data = JSON.stringify(state);
-        const blob = new Blob([data], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `가계부_백업_${currentDate}.json`;
-        a.click();
-    }
-
-    function importData(e) {
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                state = JSON.parse(e.target.result);
-                updateUI();
-                alert("성공적으로 복구되었습니다!");
-            } catch(e) { alert("잘못된 파일입니다."); }
-        };
-        reader.readAsText(file);
-    }
-
-    function resetData() {
-        if(confirm("모든 데이터를 지우고 초기화할까요? 이 작업은 되돌릴 수 없습니다.")) {
-            state = { cash: 0, card: 0, dailyHistory: {} };
-            updateUI();
-        }
     }
 
     init();
