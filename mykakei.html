@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 스마트 가계부</title>
+    <title>나의 스마트 가계부 - 달력형</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -30,12 +30,27 @@
             overflow: hidden;
         }
 
-        /* 헤더: 잔액 표시 */
+        /* 헤더: 잔액 및 날짜 선택 */
         .header {
             background: var(--primary-color);
             color: white;
             padding: 30px 20px;
             text-align: center;
+        }
+
+        .date-selector {
+            margin-bottom: 10px;
+        }
+
+        .date-selector input {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
         }
 
         .header h1 { margin: 0; font-size: 1.2rem; opacity: 0.9; }
@@ -85,7 +100,7 @@
         button:active { transform: scale(0.98); }
 
         /* 내역 리스트 */
-        .list-container { padding: 20px; }
+        .list-container { padding: 20px; min-height: 200px; }
         .list-title { font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; }
         
         .history-item {
@@ -117,13 +132,22 @@
             padding: 5px;
             font-size: 0.8rem;
         }
+
+        .empty-msg {
+            text-align: center;
+            color: #ccc;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="header">
-        <h1 id="today-date">2026년 2월 5일</h1>
+        <div class="date-selector">
+            <input type="date" id="date-picker" onchange="changeDate()">
+        </div>
+        <h1 id="display-date">2026년 2월 5일</h1>
         <div class="total-amount" id="total-balance">0원</div>
         <div class="asset-split">
             <div>💵 현금: <span id="cash-balance">0</span></div>
@@ -131,9 +155,9 @@
         </div>
     </div>
 
-    <div class="input-box">
+   <div class="input-box">
         <div class="input-row">
-            <input type="number" id="amount-input" placeholder="금액 입력">
+            <input type="number" id="amount-input" inputmode="numeric" pattern="[0-9]*" placeholder="금액 입력">
             <select id="category-input">
                 <option value="식비">🍔 식비</option>
                 <option value="교통">🚌 교통</option>
@@ -152,8 +176,8 @@
 
     <div class="list-container">
         <div class="list-title">
-            <span>최근 내역</span>
-            <span style="font-size: 0.8rem; color: #aaa;">최신순</span>
+            <span>내역 리스트</span>
+            <span id="selected-date-text" style="font-size: 0.8rem; color: #aaa;"></span>
         </div>
         <div id="history-list">
             </div>
@@ -161,41 +185,70 @@
 </div>
 
 <script>
-    // 1. 데이터 상태 관리
-    let state = JSON.parse(localStorage.getItem('myLedgerData')) || {
+    // 1. 데이터 상태 관리 (구조 변경: history를 날짜별 객체로 관리)
+    let state = JSON.parse(localStorage.getItem('myLedgerDataV2')) || {
         cash: 0,
         card: 0,
-        history: []
+        dailyHistory: {} // 예: {"2026-02-05": [...]}
     };
 
-    // 오늘 날짜 표시
-    document.getElementById('today-date').innerText = new Date().toLocaleDateString('ko-KR', {
-        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
-    });
+    let currentDate = ""; // 현재 선택된 날짜 (YYYY-MM-DD)
+
+    // 초기화 함수
+    function init() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        
+        currentDate = `${year}-${month}-${day}`;
+        document.getElementById('date-picker').value = currentDate;
+        
+        updateUI();
+    }
+
+    // 날짜 변경 시 호출
+    function changeDate() {
+        currentDate = document.getElementById('date-picker').value;
+        updateUI();
+    }
 
     // 2. 화면 업데이트 함수
     function updateUI() {
+        // 날짜 텍스트 업데이트
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        document.getElementById('display-date').innerText = new Date(currentDate).toLocaleDateString('ko-KR', options);
+        document.getElementById('selected-date-text').innerText = currentDate;
+
+        // 잔액 업데이트
         document.getElementById('cash-balance').innerText = state.cash.toLocaleString() + "원";
         document.getElementById('card-balance').innerText = state.card.toLocaleString() + "원";
         document.getElementById('total-balance').innerText = (state.cash + state.card).toLocaleString() + "원";
 
+        // 해당 날짜 내역 불러오기
         const historyList = document.getElementById('history-list');
-        historyList.innerHTML = state.history.map((item, index) => `
-            <div class="history-item">
-                <div class="item-info">
-                    <div class="item-main">${item.category}</div>
-                    <div class="item-sub">
-                        <span class="tag">${item.method}</span>
-                        <button class="delete-btn" onclick="deleteItem(${index})">삭제</button>
+        const dayData = state.dailyHistory[currentDate] || [];
+
+        if (dayData.length === 0) {
+            historyList.innerHTML = `<div class="empty-msg">내역이 없습니다.</div>`;
+        } else {
+            historyList.innerHTML = dayData.map((item, index) => `
+                <div class="history-item">
+                    <div class="item-info">
+                        <div class="item-main">${item.category}</div>
+                        <div class="item-sub">
+                            <span class="tag">${item.method}</span>
+                            <button class="delete-btn" onclick="deleteItem(${index})">삭제</button>
+                        </div>
+                    </div>
+                    <div class="item-amount ${item.type === 'plus' ? 'income' : 'expense'}">
+                        ${item.type === 'plus' ? '+' : '-'}${item.amount.toLocaleString()}원
                     </div>
                 </div>
-                <div class="item-amount ${item.type === 'plus' ? 'income' : 'expense'}">
-                    ${item.type === 'plus' ? '+' : '-'}${item.amount.toLocaleString()}원
-                </div>
-            </div>
-        `).join('');
+            `).join('');
+        }
 
-        localStorage.setItem('myLedgerData', JSON.stringify(state));
+        localStorage.setItem('myLedgerDataV2', JSON.stringify(state));
     }
 
     // 3. 입출금 처리 함수
@@ -209,20 +262,25 @@
             return;
         }
 
-        // 잔액 계산
+        // 전체 잔액 계산 (잔액은 날짜와 상관없이 유지됨)
         if (method === 'cash') {
             state.cash += (type === 'plus' ? amount : -amount);
         } else {
             state.card += (type === 'plus' ? amount : -amount);
         }
 
-        // 내역 추가
-        state.history.unshift({
+        // 해당 날짜의 배열이 없으면 새로 생성
+        if (!state.dailyHistory[currentDate]) {
+            state.dailyHistory[currentDate] = [];
+        }
+
+        // 해당 날짜 내역에 추가
+        state.dailyHistory[currentDate].unshift({
             type,
             method: method === 'cash' ? '현금' : '카드',
             category: categoryInput.value,
             amount: amount,
-            date: new Date().getTime()
+            timestamp: new Date().getTime()
         });
 
         amountInput.value = '';
@@ -231,22 +289,23 @@
 
     // 4. 내역 삭제 기능
     function deleteItem(index) {
-        if (!confirm("이 내역을 삭제하시겠습니까? 잔액도 복구됩니다.")) return;
+        if (!confirm("이 내역을 삭제하시겠습니까? 전체 잔액도 복구됩니다.")) return;
         
-        const item = state.history[index];
-        // 삭제 시 역계산으로 잔액 복구
+        const item = state.dailyHistory[currentDate][index];
+        
+        // 삭제 시 역계산으로 전체 잔액 복구
         if (item.method === '현금') {
             state.cash += (item.type === 'plus' ? -item.amount : item.amount);
         } else {
             state.card += (item.type === 'plus' ? -item.amount : item.amount);
         }
 
-        state.history.splice(index, 1);
+        state.dailyHistory[currentDate].splice(index, 1);
         updateUI();
     }
 
     // 초기 실행
-    updateUI();
+    init();
 </script>
 
 </body>
