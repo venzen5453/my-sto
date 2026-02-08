@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>심플 스마트 가계부</title>
+    <title>심플 스마트 가계부 Pro</title>
     <style>
         :root {
             --primary-color: #4a90e2;
@@ -18,108 +18,84 @@
             --border-color: #f1f1f1;
         }
 
-        /* [핵심] 전체 화면 스크롤 방지 */
+        [data-theme='dark'] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --header-bg: #121212;
+            --text-main: #f5f5f5;
+            --border-color: #3d3d3d;
+        }
+
+        /* [핵심] 전체 스크롤 금지 */
         html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #ccc; /* 배경색으로 웹 느낌 강조 */
+            height: 100%; margin: 0; padding: 0;
+            overflow: hidden; background-color: #333;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        body {
-            font-family: 'Pretendard', -apple-system, sans-serif;
-            display: flex;
-            justify-content: center;
-            color: var(--text-main);
-        }
-
-        /* 앱 컨테이너 */
         .app-container {
-            width: 100%;
-            max-width: 480px;
-            height: 100vh; /* 화면 꽉 채우기 */
-            background: var(--card-bg);
-            display: flex;
-            flex-direction: column; /* 세로로 쌓기 */
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 430px; height: 932px; /* iPhone 14 Pro Max Size */
+            background: var(--card-bg); color: var(--text-main);
+            display: flex; flex-direction: column;
+            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            overflow: hidden; transition: 0.3s;
         }
 
-        /* 상단 헤더 */
-        .header { 
-            background: var(--header-bg); 
-            color: white; 
-            padding: 20px 20px 15px 20px; 
-            text-align: center;
-            flex-shrink: 0; /* 높이 고정 */
+        /* 탭 구조 */
+        .tab-content { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+        .tab-content.active { display: flex; }
+
+        /* 상단 헤더 고정 */
+        .header {
+            background: var(--header-bg); color: white;
+            padding: 50px 20px 20px 20px; text-align: center; flex-shrink: 0;
         }
-
-        .date-nav { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 8px; }
-        .date-nav button { background: none; border: none; color: white; font-size: 1rem; cursor: pointer; }
-        .date-nav input { background: rgba(255,255,255,0.1); border: none; color: white; padding: 4px 8px; border-radius: 8px; font-size: 0.85rem; color-scheme: dark; }
-
-        .total-amount { font-size: 2.2rem; font-weight: 800; margin: 5px 0; }
-        
+        .total-amount { font-size: 2.5rem; font-weight: 800; margin: 10px 0; }
         .monthly-summary {
-            display: flex; background: rgba(0,0,0,0.2); border-radius: 12px;
-            margin: 10px 0; padding: 10px; font-size: 0.75rem; justify-content: space-around;
+            display: flex; background: rgba(0,0,0,0.2); border-radius: 15px;
+            margin: 15px 0; padding: 12px; font-size: 0.8rem; justify-content: space-around;
         }
-        .summary-box span { display: block; opacity: 0.7; }
-        .summary-box b { font-size: 1rem; }
-
         .asset-split { display: flex; justify-content: space-around; gap: 8px; }
-        .asset-item { flex: 1; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        .asset-label { font-size: 0.75rem; margin-bottom: 2px; display: block; }
+        .asset-item { flex: 1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* [핵심] 중간 스크롤 영역 */
-        .content-area {
-            flex: 1; /* 남은 공간 모두 차지 */
-            overflow-y: auto; /* 내용이 많을 때만 스크롤 */
-            padding: 20px;
-            -webkit-overflow-scrolling: touch;
-            background: var(--card-bg);
-        }
-
+        /* 입력 영역 고정 */
+        .input-box { padding: 20px; border-bottom: 8px solid var(--bg-color); flex-shrink: 0; }
         .main-input {
-            width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px;
-            font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 12px;
+            width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 12px;
+            font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 10px;
             box-sizing: border-box; outline: none; background: var(--bg-color); color: var(--text-main);
         }
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .button-grid button { padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 20px; }
-        .button-grid button { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
-
-        /* [핵심] 하단 내비게이션 - 바닥에 고정 */
-        .nav-bar {
-            width: 100%;
-            height: 60px; /* 높이 살짝 조정 */
-            background: var(--card-bg);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-shrink: 0; /* 높이 고정 */
-            padding-bottom: env(safe-area-inset-bottom);
+        /* [핵심] 내부 스크롤 영역 */
+        .scroll-area {
+            flex: 1; overflow-y: auto; padding: 0 20px;
+            -webkit-overflow-scrolling: touch;
         }
-        
-        .nav-item { border: none; background: none; color: #ccc; font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
-        .nav-item.active { color: var(--primary-color); font-weight: bold; }
-        .nav-item.disabled { opacity: 0.3; cursor: default; }
-        .nav-icon { font-size: 1.2rem; }
+        .scroll-area::-webkit-scrollbar { display: none; }
 
-        /* 거래 내역 아이템 */
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
-        .tag { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; margin-right: 5px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
         .tag-cash { background: #fff9db; color: #f08c00; }
         .tag-card { background: #e7f5ff; color: #1971c2; }
-        .delete-btn { background: none; border: none; color: #ddd; cursor: pointer; font-size: 0.7rem; margin-left: 8px; }
+        .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.75rem; }
 
-        /* 모달 스타일 */
-        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
-        .modal { background: var(--card-bg); width: 85%; max-width: 350px; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .cat-btn { padding: 8px 4px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-main); font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        /* 하단 내비게이션 고정 */
+        .nav-bar {
+            height: 85px; background: var(--card-bg); border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; align-items: center; flex-shrink: 0;
+            padding-bottom: 20px;
+        }
+        .nav-item { border: none; background: none; color: #888; font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+        .nav-item.active { color: var(--primary-color); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; }
+
+        /* 모달 */
+        #modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; }
+        .modal { background: var(--card-bg); width: 85%; border-radius: 20px; padding: 25px; }
+        .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .cat-btn { padding: 10px 5px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-color); color: var(--text-main); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .cat-btn.active { background: var(--primary-color); color: white; }
     </style>
 </head>
@@ -128,85 +104,138 @@
 <div class="app-container">
     <div id="modal-overlay">
         <div class="modal">
-            <div style="font-weight: bold; margin-bottom: 15px; text-align: center;">분류 선택</div>
+            <div style="font-weight: bold; margin-bottom: 20px; text-align: center;">분류 선택</div>
             <div class="category-grid" id="category-selector"></div>
-            <input type="text" id="note-input" class="main-input" style="font-size:0.9rem !important; text-align:left;" placeholder="상세 메모 (선택)">
+            <input type="text" id="note-input" class="main-input" style="font-size:1rem !important; text-align:left;" placeholder="상세 메모 (선택)">
             <div style="display:flex; gap:10px;">
-                <button onclick="closeModal()" style="flex:1; padding:10px; border:none; background:#eee; border-radius:10px;">취소</button>
-                <button onclick="confirmTransaction()" style="flex:1; padding:10px; border:none; background:var(--primary-color); color:white; border-radius:10px; font-weight:bold;">저장</button>
+                <button onclick="closeModal()" style="flex:1; padding:12px; border:none; background:#eee; border-radius:10px; color:#333;">취소</button>
+                <button onclick="confirmTransaction()" style="flex:1; padding:12px; border:none; background:var(--primary-color); color:white; border-radius:10px; font-weight:bold;">저장</button>
             </div>
         </div>
     </div>
 
-    <div class="header">
-        <div class="date-nav">
-            <button onclick="moveDate(-1)">◀</button>
-            <input type="date" id="date-picker" onchange="updateUI()">
-            <button onclick="moveDate(1)">▶</button>
+    <div id="tab-home" class="tab-content active">
+        <div class="header">
+            <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom:10px;">
+                <button onclick="moveDate(-1)" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">◀</button>
+                <input type="date" id="date-picker" onchange="updateUI()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:5px 10px; border-radius:10px; font-size:0.9rem; color-scheme:dark;">
+                <button onclick="moveDate(1)" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">▶</button>
+            </div>
+            <div class="total-amount" id="total-balance">¥0</div>
+            <div class="monthly-summary">
+                <div><span>한 달 수입</span><b id="month-in" style="color:#2ecc71">¥0</b></div>
+                <div><span>한 달 지출</span><b id="month-out" style="color:#ff6b6b">¥0</b></div>
+            </div>
+            <div class="asset-split">
+                <div class="asset-item"><span style="color:var(--cash-accent); font-size:0.8rem;">현금</span><div id="cash-balance" style="font-weight:800; color:var(--cash-accent)">¥0</div></div>
+                <div class="asset-item"><span style="color:var(--card-accent); font-size:0.8rem;">카드</span><div id="card-balance" style="font-weight:800; color:var(--card-accent)">¥0</div></div>
+            </div>
         </div>
-        <div class="total-amount" id="total-balance">¥0</div>
-        <div class="monthly-summary">
-            <div class="summary-box"><span>한 달 수입</span><b id="month-in" style="color:#2ecc71">¥0</b></div>
-            <div class="summary-box"><span>한 달 지출</span><b id="month-out" style="color:#ff6b6b">¥0</b></div>
+        
+        <div class="input-box">
+            <input type="number" id="amount-input" class="main-input" inputmode="numeric" placeholder="0">
+            <div class="button-grid">
+                <button style="background:#e8f5e9; color:#2ecc71;" onclick="openModal('plus', 'cash')">현금 입금</button>
+                <button style="background:#e8f5e9; color:#2ecc71;" onclick="openModal('plus', 'card')">카드 입금</button>
+                <button style="background:#ffebee; color:#e74c3c;" onclick="openModal('minus', 'cash')">현금 출금</button>
+                <button style="background:#ffebee; color:#e74c3c;" onclick="openModal('minus', 'card')">카드 출금</button>
+            </div>
         </div>
-        <div class="asset-split">
-            <div class="asset-item"><span class="asset-label" style="color:var(--cash-accent)">현금</span><div id="cash-balance" style="font-weight:800; font-size:1rem; color:var(--cash-accent)">¥0</div></div>
-            <div class="asset-item"><span class="asset-label" style="color:var(--card-accent)">카드</span><div id="card-balance" style="font-weight:800; font-size:1rem; color:var(--card-accent)">¥0</div></div>
+
+        <div class="scroll-area">
+            <h4 style="margin: 20px 0 10px 0; color: var(--text-main);">오늘의 거래 내역</h4>
+            <div id="history-list"></div>
         </div>
     </div>
 
-    <div class="content-area">
-        <input type="number" id="amount-input" class="main-input" inputmode="numeric" placeholder="금액 입력">
-        <div class="button-grid">
-            <button style="background:#e8f5e9; color:#2ecc71;" onclick="openModal('plus', 'cash')">현금 입금</button>
-            <button style="background:#e8f5e9; color:#2ecc71;" onclick="openModal('plus', 'card')">카드 입금</button>
-            <button style="background:#ffebee; color:#e74c3c;" onclick="openModal('minus', 'cash')">현금 출금</button>
-            <button style="background:#ffebee; color:#e74c3c;" onclick="openModal('minus', 'card')">카드 출금</button>
+    <div id="tab-search" class="tab-content">
+        <div class="header"><h2>거래 검색</h2></div>
+        <div style="padding: 20px; flex-shrink:0;">
+            <input type="text" id="search-input" class="main-input" style="font-size:1.1rem; text-align:left;" placeholder="분류나 메모를 입력하세요..." onkeyup="searchHistory()">
         </div>
-        
-        <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color:#888;">거래 내역</h4>
-        <div id="history-list"></div>
+        <div class="scroll-area" id="search-results"></div>
+    </div>
+
+    <div id="tab-more" class="tab-content">
+        <div class="header"><h2>설정</h2></div>
+        <div class="scroll-area" style="padding-top:20px;">
+            <div style="background:var(--bg-color); padding:20px; border-radius:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span>🌙 다크 모드</span>
+                <button onclick="toggleTheme()" id="theme-status" style="padding:8px 20px; border-radius:20px; border:1px solid var(--primary-color); background:none; color:var(--primary-color); font-weight:bold;">OFF</button>
+            </div>
+            <div style="background:var(--bg-color); padding:20px; border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span>📂 데이터 내보내기</span>
+                <button onclick="exportCSV()" style="padding:10px 20px; border-radius:10px; border:none; background:var(--primary-color); color:white; font-weight:bold;">CSV 저장</button>
+            </div>
+        </div>
     </div>
 
     <nav class="nav-bar">
-        <button class="nav-item active">
-            <span class="nav-icon">🏠</span>
-            <span>홈</span>
-        </button>
-        <button class="nav-item disabled">
-            <span class="nav-icon">🔍</span>
-            <span>검색</span>
-        </button>
-        <button class="nav-item disabled">
-            <span class="nav-icon">⚙️</span>
-            <span>설정</span>
-        </button>
+        <button class="nav-item active" onclick="switchTab('home', this)"><span class="nav-icon">🏠</span>홈</button>
+        <button class="nav-item" onclick="switchTab('search', this)"><span class="nav-icon">🔍</span>검색</button>
+        <button class="nav-item" onclick="switchTab('more', this)"><span class="nav-icon">⚙️</span>설정</button>
     </nav>
 </div>
 
 <script>
-    // [기존 스크립트 로직 유지]
     const categories = {
         plus: [{name:'월급',icon:'💰'},{name:'용돈',icon:'🎁'},{name:'부수입',icon:'📈'},{name:'금융',icon:'🏦'},{name:'기타',icon:'✨'}],
         minus: [{name:'식비',icon:'🍔'},{name:'교통비',icon:'🚌'},{name:'여가',icon:'🎮'},{name:'쇼핑',icon:'🛍️'},{name:'의료',icon:'🏥'},{name:'기타',icon:'✨'}]
     };
 
-    let state = JSON.parse(localStorage.getItem('finalLedgerData_V1')) || { cash: 0, card: 0, dailyHistory: {} };
+    let state = JSON.parse(localStorage.getItem('finalLedger_V3')) || { cash: 0, card: 0, dailyHistory: {}, isDark: false };
     let currentTransaction = null;
     let selectedCategory = "";
 
     function init() {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date-picker').value = today;
+        if(state.isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-status').innerText = 'ON';
+        }
         updateUI();
     }
 
-    function moveDate(offset) {
-        const picker = document.getElementById('date-picker');
-        let d = new Date(picker.value);
-        d.setDate(d.getDate() + offset);
-        picker.value = d.toISOString().split('T')[0];
-        updateUI();
+    function switchTab(tabName, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('tab-' + tabName).classList.add('active');
+        el.classList.add('active');
+    }
+
+    function toggleTheme() {
+        state.isDark = !state.isDark;
+        document.documentElement.setAttribute('data-theme', state.isDark ? 'dark' : 'light');
+        document.getElementById('theme-status').innerText = state.isDark ? 'ON' : 'OFF';
+        save();
+    }
+
+    function searchHistory() {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        const resBox = document.getElementById('search-results');
+        if(!q) { resBox.innerHTML = ""; return; }
+        let html = "";
+        Object.keys(state.dailyHistory).sort().reverse().forEach(date => {
+            state.dailyHistory[date].forEach(item => {
+                if(item.category.includes(q) || item.note.toLowerCase().includes(q)) {
+                    html += `<div class="history-item"><div><b>[${date}]</b> ${item.category}<br><small>${item.note}</small></div><div style="color:${item.type==='plus'?'var(--income-color)':'var(--expense-color)'}; font-weight:bold;">¥${item.amount.toLocaleString()}</div></div>`;
+                }
+            });
+        });
+        resBox.innerHTML = html || "<p style='text-align:center; padding:50px; color:#ccc;'>결과가 없습니다.</p>";
+    }
+
+    function exportCSV() {
+        let csv = "날짜,분류,수단,금액,메모\n";
+        Object.keys(state.dailyHistory).forEach(date => {
+            state.dailyHistory[date].forEach(i => csv += `${date},${i.category},${i.method},${i.amount},${i.note}\n`);
+        });
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "가계부_데이터.csv";
+        link.click();
     }
 
     function openModal(type, method) {
@@ -215,40 +244,27 @@
         currentTransaction = { type, method, amount: amt };
         selectedCategory = "";
         const selector = document.getElementById('category-selector');
-        selector.innerHTML = categories[type].map(cat => `
-            <button class="cat-btn" onclick="selectCat('${cat.name}', this)">
-                <span style="font-size:1.1rem">${cat.icon}</span>${cat.name}
-            </button>`).join('');
+        selector.innerHTML = categories[type].map(cat => `<button class="cat-btn" onclick="selectCat('${cat.name}', this)"><span>${cat.icon}</span>${cat.name}</button>`).join('');
         document.getElementById('modal-overlay').style.display = 'flex';
     }
 
-    function selectCat(name, btn) {
+    function selectCat(n, btn) {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        selectedCategory = name;
+        selectedCategory = n;
     }
 
     function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
     function confirmTransaction() {
-        if(!selectedCategory) return alert("분류를 선택해주세요.");
+        if(!selectedCategory) return alert("분류를 선택하세요.");
         const date = document.getElementById('date-picker').value;
         const { type, method, amount } = currentTransaction;
-        
         if(method === 'cash') state.cash += (type==='plus'? amount : -amount);
         else state.card += (type==='plus'? amount : -amount);
-        
         if(!state.dailyHistory[date]) state.dailyHistory[date] = [];
-        state.dailyHistory[date].unshift({ 
-            type, 
-            method: method==='cash'?'현금':'카드', 
-            category: selectedCategory, 
-            note: document.getElementById('note-input').value || selectedCategory, 
-            amount 
-        });
-        
+        state.dailyHistory[date].unshift({ type, method: method==='cash'?'현금':'카드', category: selectedCategory, note: document.getElementById('note-input').value || selectedCategory, amount });
         document.getElementById('amount-input').value = "";
-        document.getElementById('note-input').value = "";
         closeModal();
         updateUI();
     }
@@ -258,12 +274,8 @@
         const curMonth = activeDate.substring(0, 7);
         document.getElementById('cash-balance').innerText = "¥" + state.cash.toLocaleString();
         document.getElementById('card-balance').innerText = "¥" + state.card.toLocaleString();
+        document.getElementById('total-balance').innerText = "¥" + (state.cash + state.card).toLocaleString();
         
-        const total = state.cash + state.card;
-        const totalEl = document.getElementById('total-balance');
-        totalEl.innerText = "¥" + total.toLocaleString();
-        totalEl.style.color = total >= 0 ? "white" : "#ff6b6b";
-
         let mIn = 0, mOut = 0;
         Object.keys(state.dailyHistory).forEach(date => {
             if(date.startsWith(curMonth)) {
@@ -280,19 +292,16 @@
         const dayData = state.dailyHistory[activeDate] || [];
         list.innerHTML = dayData.map((item, i) => `
             <div class="history-item">
-                <div style="font-size:0.85rem;"><b>${item.category}</b> <small style="color:#888;">| ${item.note}</small><br>
+                <div><b>${item.category}</b> <small>| ${item.note}</small><br>
                 <span class="tag ${item.method==='현금'?'tag-cash':'tag-card'}">${item.method}</span>
                 <button class="delete-btn" onclick="deleteItem('${activeDate}', ${i})">삭제</button></div>
-                <div style="font-weight:bold; font-size:0.9rem; color:${item.type==='plus'?'var(--income-color)':'var(--expense-color)'}">
-                    ${item.type==='plus'?'+':'-'}¥${item.amount.toLocaleString()}
-                </div>
-            </div>
-        `).join('') || '<p style="text-align:center; color:#ccc; padding:30px; font-size:0.8rem;">내역 없음</p>';
+                <div style="font-weight:bold; color:${item.type==='plus'?'var(--income-color)':'var(--expense-color)'}">${item.type==='plus'?'+':'-'}¥${item.amount.toLocaleString()}</div>
+            </div>`).join('') || '<p style="text-align:center; color:#ccc; padding:50px;">거래 내역 없음</p>';
         save();
     }
 
     function deleteItem(date, i) {
-        if(!confirm("삭제하시겠습니까?")) return;
+        if(!confirm("삭제할까요?")) return;
         const item = state.dailyHistory[date][i];
         if(item.method === '현금') state.cash += (item.type==='plus' ? -item.amount : item.amount);
         else state.card += (item.type==='plus' ? -item.amount : item.amount);
@@ -300,8 +309,15 @@
         updateUI();
     }
 
-    function save() { localStorage.setItem('finalLedgerData_V1', JSON.stringify(state)); }
+    function moveDate(offset) {
+        const picker = document.getElementById('date-picker');
+        let d = new Date(picker.value);
+        d.setDate(d.getDate() + offset);
+        picker.value = d.toISOString().split('T')[0];
+        updateUI();
+    }
 
+    function save() { localStorage.setItem('finalLedger_V3', JSON.stringify(state)); }
     init();
 </script>
 </body>
