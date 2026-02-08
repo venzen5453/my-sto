@@ -39,15 +39,17 @@
         .btn-minus { background: var(--btn-minus-bg) !important; color: var(--btn-minus-text) !important; }
         .scroll-area { flex: 1; overflow-y: auto; padding: 0 20px; background: var(--bg-color); }
         .scroll-area::-webkit-scrollbar { display: none; }
-        /* 거래 내역을 담는 2단 컨테이너 */
+
+/* --------------------------------------------------------------------------------- */
+        
+/* 거래 내역을 담는 2단 컨테이너 */
+/* --- [홈 화면] 요청하신 컴팩트 스타일 --- */
 .history-split-container {
     display: flex;
     gap: 10px;
     padding: 15px 0;
     border-bottom: 1px solid var(--border-color);
 }
-
-/* 왼쪽(현금), 오른쪽(카드) 구역 */
 .history-column {
     flex: 1;
     display: flex;
@@ -55,27 +57,66 @@
     gap: 8px;
     min-height: 20px;
 }
-
-/* 중앙 구분선 */
 .column-divider {
     width: 1px;
     background-color: var(--border-color);
 }
-
-/* 개별 내역 아이템 (간소화) */
 .history-mini-item {
     font-size: 0.8rem;
-    padding: 5px;
+    padding: 6px 5px; /* 컴팩트하지만 가독성 있게 조정 */
     border-radius: 8px;
-    background: rgba(0,0,0,0.03);
+    background: rgba(120, 120, 120, 0.05); /* 다크/라이트 범용 배경 */
 }
-[data-theme='dark'] .history-mini-item { background: rgba(255,255,255,0.05); }
 
-.mini-amt {
-    font-weight: bold;
-    display: block;
-    font-size: 0.85rem;
+
+/* --- [검색 화면] 세련된 미니멀 카드 스타일 (수정본) --- */
+.search-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 왼쪽 패딩을 25px로 늘려 색상 바와 글씨 사이의 간격을 확보합니다 */
+    padding: 10px 10px 10px 20px; 
+    margin-bottom: 10px;
+    background: var(--card-bg);
+    border-radius: 10px; /* 좀 더 둥글게 수정 */
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
 }
+
+/* 왼쪽 포인트 라인 (두께를 살짝 얇게 조정하여 더 세련되게 변경) */
+.search-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0; 
+    width: 5px; /* 기존 5px에서 4px로 조절 */
+}
+.search-cash::before { background-color: #fcc419; }
+.search-card::before { background-color: #4dabf7; }
+
+/* 결제수단 태그: 배경을 투명하게 고정 */
+.method-tag {
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: inline-block;
+    background: transparent !important; 
+    padding: 0 !important;
+    margin-right: 6px;
+}
+
+/* 글자색 포인트 */
+.tag-cash { color: #fcc419 !important; } 
+.tag-card { color: #4dabf7 !important; }
+
+/* 다크모드 가독성 보정 */
+[data-theme='dark'] .tag-cash { color: #ffec99 !important; }
+[data-theme='dark'] .tag-card { color: #a5d8ff !important; }
+
+.search-cat { font-size: 1.05rem; font-weight: 700; display: block; margin-top: 2px; }
+.search-amt { font-size: 1.1rem; font-weight: 800; text-align: right; }
+
+/* ---------------------------------------------------------------------- */
+
         .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
         .tag-cash { background: #fff9db; color: #f08c00; }
         .tag-card { background: #e7f5ff; color: #1971c2; }
@@ -140,11 +181,10 @@
         <div class="scroll-area" id="history-list"></div>
     </div>
 
-    <div id="tab-chart" class="tab-content">
+<div id="tab-chart" class="tab-content">
         <div class="header" style="padding: 60px 20px 20px 20px;">
             <h2 style="margin:0;">📊 이번 달 지출 분석</h2>
-            <div id="chart-month-label" style="opacity:0.8; margin-top:5px;"></div>
-        </div>
+            <div id="chart-month-label" style="opacity:0.8; margin-top:5px; height: 1.2rem;"></div> </div>
         <div class="scroll-area">
             <div id="chart-list" class="chart-container"></div>
             <div id="chart-empty" style="text-align:center; padding:50px; opacity:0.5; display:none;">지출 내역이 없습니다.</div>
@@ -152,13 +192,17 @@
     </div>
 
     <div id="tab-search" class="tab-content">
-        <div class="header" style="padding: 60px 20px 20px 20px;"><h2>🔍 거래 검색</h2></div>
+        <div class="header" style="padding: 60px 20px 20px 20px;">
+            <h2 style="margin:0;">🔍 거래 검색</h2>
+            <div style="opacity:0.8; margin-top:5px; font-size: 0.9rem;">내역 필터링 및 검색</div> </div>
         <div style="padding: 20px;"><input type="text" id="search-input" class="styled-input" placeholder="분류나 메모 검색..." onkeyup="searchHistory()"></div>
         <div class="scroll-area" id="search-results"></div>
     </div>
 
     <div id="tab-more" class="tab-content">
-        <div class="header" style="padding: 60px 20px 20px 20px;"><h2>⚙️ 설정</h2></div>
+        <div class="header" style="padding: 60px 20px 20px 20px;">
+            <h2 style="margin:0;">⚙️ 설정</h2>
+            <div style="opacity:0.8; margin-top:5px; font-size: 0.9rem;">앱 환경 설정 및 관리</div> </div>
         <div class="scroll-area" style="padding-top:20px;">
             <div style="background:var(--card-bg); padding:20px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border-color); margin-bottom:15px;">
                 <span>🌙 다크 모드</span>
@@ -168,7 +212,7 @@
             
             <h4 style="margin:0 0 10px 5px;">🔁 고정 지출 설정</h4>
             <div style="background:var(--card-bg); padding:18px; border-radius:15px; border:1px solid var(--border-color); margin-bottom:40px;">
-                <input type="text" id="fixed-name" class="styled-input" placeholder="항목명 (예: 월세)" style="margin-bottom:8px;">
+                <input type="text" id="fixed-name" class="styled-input" placeholder="항목" style="margin-bottom:8px;">
                 <div style="display:flex; gap:8px; margin-bottom:12px;">
                     <input type="number" id="fixed-day" class="styled-input" placeholder="날짜(1~31)" style="flex:1;">
                     <input type="number" id="fixed-amount" class="styled-input" placeholder="금액" style="flex:2;">
@@ -279,21 +323,23 @@
         const cashItems = dayData.filter(h => h.method === '현금');
         const cardItems = dayData.filter(h => h.method === '카드');
 
-        const renderMiniItem = (h, i) => `
-            <div class="history-mini-item">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <span style="font-weight:bold;">${h.category}</span>
-                    <button onclick="deleteItem('${activeDate}', ${dayData.indexOf(h)})" 
-                            style="color:#e74c3c; background:none; border:none; font-size:0.65rem; padding:0; cursor:pointer; font-weight:bold;">
-                        삭제
-                    </button>
-                </div>
-                <div style="font-size:0.7rem; opacity:0.8; margin:2px 0;">${h.note}</div>
-                <span class="mini-amt" style="color:${h.type==='plus'?'#2ecc71':'#e74c3c'}">
-                    ${h.type==='plus'?'+':'-'}¥${h.amount.toLocaleString()}
-                </span>
-            </div>
-        `;
+const renderMiniItem = (h, i) => `
+    <div class="history-mini-item">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <span style="font-weight:bold;">${h.category}</span>
+            <button onclick="deleteItem('${activeDate}', ${dayData.indexOf(h)})" 
+                    style="color:#e74c3c; background:none; border:none; font-size:0.65rem; padding:0; cursor:pointer; font-weight:bold;">
+                삭제
+            </button>
+        </div>
+        <div style="font-size:0.7rem; opacity:0.8; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${h.note}
+        </div>
+        <span class="mini-amt" style="color:${h.type==='plus'?'#2ecc71':'#e74c3c'}">
+            ${h.type==='plus'?'+':'-'}¥${h.amount.toLocaleString()}
+        </span>
+    </div>
+`;
 
         historyListEl.innerHTML = `
             <div style="display:flex; justify-content:space-around; font-size:0.75rem; font-weight:bold; padding-top:15px; opacity:0.7;">
@@ -326,7 +372,21 @@ function exportMonthlyExcel() {
             table { border-collapse: collapse; width: 900px; font-family: 'Malgun Gothic', sans-serif; }
             /* 모든 셀을 가운데 정렬로 통일 */
             td { border: 1px solid #dddddd; padding: 10px; text-align: center; vertical-align: middle; }
-            .header { background-color: #2c3e50; color: #ffffff; font-weight: bold; }
+            .header { 
+    background: var(--header-bg); 
+    color: white; 
+    padding: 0 20px 20px 20px; /* 상단 패딩 제거, 하단만 유지 */
+    text-align: center; 
+    flex-shrink: 0; 
+    transition: background 0.3s;
+    
+    /* 추가: 통계 탭 높이에 맞춰 150px로 고정 */
+    height: 150px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* 제목들이 같은 바닥 라인에 오도록 설정 */
+    box-sizing: border-box;
+}
             .income { color: #27ae60; background-color: #f1fef6; }
             .expense { color: #e74c3c; background-color: #fef5f5; }
             .cash-tag { color: #f39c12; font-weight: bold; }
@@ -450,7 +510,38 @@ function exportMonthlyExcel() {
 }
     function moveDate(o) { const p = document.getElementById('date-picker'); let d = new Date(p.value); d.setDate(d.getDate()+o); p.value = d.toISOString().split('T')[0]; updateUI(); }
     function toggleTheme() { state.isDark = !state.isDark; document.documentElement.setAttribute('data-theme', state.isDark?'dark':'light'); document.getElementById('theme-status').innerText = state.isDark?'ON':'OFF'; save(); }
-    function searchHistory() { const q = document.getElementById('search-input').value.toLowerCase(); const res = []; Object.keys(state.dailyHistory).forEach(d => { state.dailyHistory[d].forEach(h => { if(h.category.toLowerCase().includes(q) || h.note.toLowerCase().includes(q)) res.push({...h, date: d}); }); }); document.getElementById('search-results').innerHTML = res.map(h => `<div class="history-item"><div><small>${h.date}</small><br><b>${h.category}</b> <small>${h.note}</small></div><div style="font-weight:bold; color:${h.type==='plus'?'#2ecc71':'#e74c3c'}">${h.type==='plus'?'+':'-'}¥${h.amount.toLocaleString()}</div></div>`).join(''); }
+    function searchHistory() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const res = [];
+    
+    Object.keys(state.dailyHistory).forEach(d => {
+        state.dailyHistory[d].forEach(h => {
+            if(h.category.toLowerCase().includes(q) || h.note.toLowerCase().includes(q)) {
+                res.push({...h, date: d});
+            }
+        });
+    });
+
+        // 검색 결과 렌더링 부분에서 반드시 .search-item 클래스를 사용하세요
+        document.getElementById('search-results').innerHTML = res.map(h => {
+            const isCash = h.method === '현금';
+            return `
+                <div class="search-item ${isCash ? 'search-cash' : 'search-card'}">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span class="method-tag ${isCash ? 'tag-cash' : 'tag-card'}">${h.method}</span>
+                            <small style="opacity:0.5;">${h.date}</small>
+                        </div>
+                        <span class="search-cat">${h.category}</span>
+                        <div style="font-size:0.85rem; opacity:0.6;">${h.note}</div>
+                    </div>
+                    <div class="search-amt" style="color:${h.type==='plus'?'#2ecc71':'#e74c3c'}">
+                        ${h.type==='plus'?'+':'-'}¥${h.amount.toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }).join('');
+}
     function save() { localStorage.setItem('finalLedger_V41', JSON.stringify(state)); }
     init();
 </script>
