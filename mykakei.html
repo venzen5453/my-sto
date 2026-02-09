@@ -120,9 +120,50 @@
         .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
         .tag-cash { background: #fff9db; color: #f08c00; }
         .tag-card { background: #e7f5ff; color: #1971c2; }
-        .nav-bar { height: 85px; background: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; padding-bottom: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); 
-    height: auto; /* 높이를 고정하지 않고 패딩에 맡김 */}
-        .nav-item { border: none; background: none; color: #888; font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+
+        
+        .nav-bar { 
+    height: 95px; /* 높이를 살짝 키움 */
+    background: var(--card-bg); 
+    border-top: 1px solid var(--border-color); 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: flex-start; /* 아이콘을 상단 정렬로 변경하여 위로 올림 */
+    flex-shrink: 0; 
+    /* 아이폰 홈 바 영역 확보 및 아이콘 위치 상향 조정 */
+    padding-top: 15px; 
+    padding-bottom: calc(30px + env(safe-area-inset-bottom)); 
+    box-sizing: border-box;
+}
+
+.nav-item { 
+    border: none; 
+    background: none; 
+    color: #888; 
+    font-size: 0.6rem; /* 글씨를 아주 작게 조정 */
+    letter-spacing: -0.03em; /* 자간을 더 조여서 깔끔하게 */
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 1px; /* 아이콘과 글자 사이 간격을 최소화 */
+    flex: 1; 
+    transition: 0.2s;
+    opacity: 0.9;
+}
+
+/* 활성화된 탭의 강조 효과 */
+.nav-item.active { 
+    color: var(--primary-color); 
+    font-weight: 700; 
+    opacity: 1;
+}
+
+/* 아이콘 크기 고정 (이전과 동일하게 유지) */
+.nav-item span:first-child {
+    font-size: 1.4rem; /* 아이콘 크기는 시원하게 유지 */
+    margin-bottom: 0px;
+}
         .nav-item.active { color: var(--primary-color); font-weight: bold; }
         .styled-input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--input-text); box-sizing: border-box; outline: none; font-size: 1rem; }
         #modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
