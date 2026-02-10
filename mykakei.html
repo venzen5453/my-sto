@@ -230,8 +230,9 @@
 </head>
 
 <body>
-    <div class="app-container">
-        <div id="modal-overlay">
+    <div class="app-container" style="position: relative; height: 100vh; display: flex; flex-direction: column;">
+        
+        <div id="modal-overlay" style="z-index: 2000;">
             <div class="modal">
                 <div id="modal-type-title" style="font-weight: bold; margin-bottom: 15px; text-align: center; color: var(--primary-color);">내역 입력</div>
                 <input type="number" id="modal-amount-input" class="modal-input" inputmode="numeric" placeholder="0">
@@ -244,7 +245,7 @@
             </div>
         </div>
 
-        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+        <div class="main-content" style="flex: 1; overflow-y: auto; padding-bottom: calc(70px + env(safe-area-inset-bottom));">
             
             <div id="tab-home" class="tab-content active">
                 <div class="header">
@@ -259,6 +260,7 @@
                         <div class="asset-item"><span class="asset-label" style="color:var(--card-accent)">카드</span><div id="card-balance" class="asset-value">¥0</div></div>
                     </div>
                 </div>
+
                 <div class="action-box">
                     <div class="button-grid">
                         <button class="btn-plus" onclick="openModal('plus', 'cash')">💰 현금 입금</button>
@@ -267,46 +269,45 @@
                         <button class="btn-minus" onclick="openModal('minus', 'card')">🛍️ 카드 출금</button>
                     </div>
                 </div>
+                
                 <div class="scroll-area" id="history-list"></div>
             </div>
 
-            <div id="tab-chart" class="tab-content">
-                <div class="header"><h2 style="margin:0;">📊 통계</h2></div>
-                <div class="scroll-area"><div id="chart-list" class="chart-container"></div></div>
-            </div>
-
-            <div id="tab-search" class="tab-content">
-                <div class="header"><h2 style="margin:0;">🔍 검색</h2></div>
-                <div style="padding:15px;"><input type="text" id="search-input" class="styled-input" placeholder="분류/메모 검색..." onkeyup="searchHistory()"></div>
-                <div class="scroll-area" id="search-results"></div>
-            </div>
-
-            <div id="tab-more" class="tab-content">
-                <div class="header"><h2 style="margin:0;">⚙️ 설정</h2></div>
-                <div class="scroll-area" style="padding:20px;">
-                    <button onclick="exportMonthlyExcel()" style="width:100%; padding:15px; border-radius:12px; background:var(--header-bg); color:white; font-weight:bold; border:none; margin-bottom:20px;">📂 엑셀 저장</button>
-                    <div id="fixed-item-box" style="margin-bottom:100px;">
-                        <h4 style="margin-bottom:10px;">🔁 고정 지출 등록</h4>
-                        <input type="text" id="fixed-name" class="styled-input" placeholder="항목명" style="margin-bottom:8px;">
-                        <button onclick="addFixedItem()" style="width:100%; padding:12px; background:var(--primary-color); color:white; border:none; border-radius:10px; font-weight:bold;">등록</button>
-                    </div>
-                </div>
-            </div>
-
+            <div id="tab-chart" class="tab-content"><div class="header"><h2>📊 통계</h2></div><div id="chart-list"></div></div>
+            <div id="tab-search" class="tab-content"><div class="header"><h2>🔍 검색</h2></div><div id="search-results"></div></div>
+            <div id="tab-more" class="tab-content"><div class="header"><h2>⚙️ 설정</h2></div></div>
         </div>
 
-        <nav class="nav-bar" style="position: relative; bottom: 0; left: 0; right: 0; width: 100%; max-width: 430px; margin: 0; padding-bottom: env(safe-area-inset-bottom); background: var(--card-bg); border-top: 1px solid var(--border-color); border-radius: 0; height: auto; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
-            <button class="nav-item active" onclick="switchTab('home', this)" style="padding: 12px 0;">
-                <span>🏠</span><span>홈</span>
+        <nav class="nav-bar" style="
+            position: fixed; 
+            bottom: 0; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 100%; 
+            max-width: 430px; 
+            height: calc(65px + env(safe-area-inset-bottom));
+            background: var(--card-bg); 
+            border-top: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: flex-start; 
+            padding-top: 10px; 
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 1000;
+            border-radius: 0;
+            box-sizing: border-box;
+        ">
+            <button class="nav-item active" onclick="switchTab('home', this)" style="background:none; border:none; flex:1; display:flex; flex-direction:column; align-items:center; color:inherit;">
+                <span style="font-size:1.4rem;">🏠</span><span style="font-size:0.65rem; font-weight:bold;">홈</span>
             </button>
-            <button class="nav-item" onclick="switchTab('chart', this)" style="padding: 12px 0;">
-                <span>📊</span><span>통계</span>
+            <button class="nav-item" onclick="switchTab('chart', this)" style="background:none; border:none; flex:1; display:flex; flex-direction:column; align-items:center; color:#888;">
+                <span style="font-size:1.4rem;">📊</span><span style="font-size:0.65rem; font-weight:bold;">통계</span>
             </button>
-            <button class="nav-item" onclick="switchTab('search', this)" style="padding: 12px 0;">
-                <span>🔍</span><span>검색</span>
+            <button class="nav-item" onclick="switchTab('search', this)" style="background:none; border:none; flex:1; display:flex; flex-direction:column; align-items:center; color:#888;">
+                <span style="font-size:1.4rem;">🔍</span><span style="font-size:0.65rem; font-weight:bold;">검색</span>
             </button>
-            <button class="nav-item" onclick="switchTab('more', this)" style="padding: 12px 0;">
-                <span>⚙️</span><span>설정</span>
+            <button class="nav-item" onclick="switchTab('more', this)" style="background:none; border:none; flex:1; display:flex; flex-direction:column; align-items:center; color:#888;">
+                <span style="font-size:1.4rem;">⚙️</span><span style="font-size:0.65rem; font-weight:bold;">설정</span>
             </button>
         </nav>
     </div>
