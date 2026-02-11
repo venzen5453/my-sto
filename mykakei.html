@@ -36,7 +36,7 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
         .app-container { position: fixed; inset: 0; width: min(430px, 100vw);height: 100vh; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
-        .tab-content { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+        .tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
         .tab-content.active { display: flex; }
         .header { background: var(--header-bg); color: white; padding: 50px 20px 20px 20px; text-align: center; flex-shrink: 0; transition: background 0.3s; }
         .total-amount { font-size: 1.6rem; font-weight: 700; margin: 5px 0; opacity: 0.9; }
@@ -137,7 +137,7 @@ html, body {
         
 /* 하단 내비게이션 바를 공중으로 띄움 */
 .nav-bar { 
-    position: absolute; /* 🔥 fixed → absolute */
+    position: absolute; 
     bottom: calc(15px + env(safe-area-inset-bottom)); 
     left: 20px;
     right: 20px;
@@ -185,9 +185,6 @@ html, body {
     margin-bottom: 0px;
 }
         .nav-item.active { color: var(--primary-color); font-weight: bold; }
-
-
-        
         .styled-input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--input-text); box-sizing: border-box; outline: none; font-size: 1rem; }
         #modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal { background: var(--card-bg); width: 88%; border-radius: 25px; padding: 25px; box-sizing: border-box; color: var(--text-main); }
