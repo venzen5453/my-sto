@@ -50,7 +50,7 @@ html, body {
         .button-grid button { padding: 22px 10px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1.0rem; }
         .btn-plus { background: var(--btn-plus-bg) !important; color: var(--btn-plus-text) !important; }
         .btn-minus { background: var(--btn-minus-bg) !important; color: var(--btn-minus-text) !important; }
-        .scroll-area { flex: 1; overflow-y: auto;  -webkit-overflow-scrolling: touch;  padding: 0 20px calc(70px + env(safe-area-inset-bottom)); background: var(--bg-color); }
+        .scroll-area { flex: 1; overflow-y: auto;  -webkit-overflow-scrolling: touch;   padding: 0 20px calc(70px + env(safe-area-inset-bottom)); background: var(--bg-color); }
        
 
 /* --------------------------------------------------------------------------------- */
@@ -136,22 +136,24 @@ html, body {
 
         
 /* 하단 내비게이션 바를 공중으로 띄움 */
-.nav-bar {
-    position: absolute;
-    bottom: 0;   /* 🔥 무조건 0 */
-    left: 0;
-    right: 0;
+.nav-bar { 
+    position: absolute; 
+    bottom: 0; 
+    left: 20px;
+    right: 20px;
+    max-width: 440px;
+
     height: 70px;
+    background: var(--card-bg); 
+    border: 1px solid var(--border-color); 
+    border-radius: 20px;
 
-    padding-bottom: env(safe-area-inset-bottom);
-    background: var(--card-bg);
-    border-top: 1px solid var(--border-color);
-
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; 
 
     z-index: 1000;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 
