@@ -136,24 +136,22 @@ html, body {
 
         
 /* 하단 내비게이션 바를 공중으로 띄움 */
-.nav-bar { 
-    position: absolute; 
-    bottom: calc(15px + env(safe-area-inset-bottom)); 
-    left: 20px;
-    right: 20px;
-    max-width: 440px;
-
+.nav-bar {
+    position: absolute;
+    bottom: 0;   /* 🔥 무조건 0 */
+    left: 0;
+    right: 0;
     height: 70px;
-    background: var(--card-bg); 
-    border: 1px solid var(--border-color); 
-    border-radius: 20px;
 
-    display: flex; 
-    justify-content: space-around; 
-    align-items: center; 
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 
     z-index: 1000;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 
