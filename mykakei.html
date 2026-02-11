@@ -4,8 +4,7 @@
 <head>
     <link rel="apple-touch-icon" href="./aisa.jpg">
     <meta charset="UTF-8">
-    <meta name="viewport" 
-      content="width=device-width, initial-scale=1.0, 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, 
                maximum-scale=1.0, 
                user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +32,7 @@
         }
 
         [data-theme='dark'] {
-           --bg-color: #1a1c22;
+            --bg-color: #1a1c22;
             --card-bg: #24262d;
             --header-bg: #1f2937;
             --text-main: #f5f5f5;
@@ -348,16 +347,18 @@
 
 
         .nav-icon {
-            font-size: 1.5rem;   /* 아이콘 크기 */
+            font-size: 1.5rem;
+            /* 아이콘 크기 */
             line-height: 1;
         }
 
         .nav-text {
-            font-size: 0.8rem;   /* 글씨 크기 */
+            font-size: 0.8rem;
+            /* 글씨 크기 */
             margin-top: 3px;
         }
 
-     
+
 
         .nav-item.active {
             color: var(--primary-color);
@@ -375,6 +376,7 @@
             outline: none;
             font-size: 1rem;
         }
+
         #modal-overlay {
             display: none;
             position: fixed;
@@ -393,7 +395,7 @@
             padding: 18px;
             background: var(--card-bg);
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
             animation: modalUp 0.25s ease-out;
         }
 
@@ -447,11 +449,12 @@
             transition: width 0.5s ease-out;
         }
 
-                @keyframes modalUp {
+        @keyframes modalUp {
             from {
                 transform: translateY(30px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -463,12 +466,12 @@
                 transform: translateY(0);
                 opacity: 1;
             }
+
             to {
                 transform: translateY(30px);
                 opacity: 0;
             }
         }
-
     </style>
 </head>
 
@@ -879,16 +882,16 @@
         }
         function openModal(t, m) { currentTransaction = { t, m }; document.getElementById('modal-amount-input').value = ""; document.getElementById('modal-note-input').value = ""; selectedCategory = ""; document.getElementById('category-selector').innerHTML = categories[t].map(c => `<button class="cat-btn" style="padding:12px 5px; border:1px solid var(--border-color); border-radius:12px; background:var(--input-bg); color:var(--text-main); font-size:0.8rem; display:flex; flex-direction:column; align-items:center; cursor:pointer;" onclick="selectedCategory='${c.name}'; Array.from(this.parentNode.children).forEach(b=>b.style.borderColor='var(--border-color)'); this.style.borderColor='var(--primary-color)'">${c.icon}<br>${c.name}</button>`).join(''); document.getElementById('modal-overlay').style.display = 'flex'; }
         function closeModal() {
-    const overlay = document.getElementById('modal-overlay');
-    const modal = overlay.querySelector('.modal');
+            const overlay = document.getElementById('modal-overlay');
+            const modal = overlay.querySelector('.modal');
 
-    modal.classList.add('closing');
+            modal.classList.add('closing');
 
-    setTimeout(() => {
-        modal.classList.remove('closing');
-        overlay.style.display = 'none';
-    }, 200); // 애니메이션 시간과 동일
-}
+            setTimeout(() => {
+                modal.classList.remove('closing');
+                overlay.style.display = 'none';
+            }, 200); // 애니메이션 시간과 동일
+        }
         function confirmTransaction() { const amt = parseInt(document.getElementById('modal-amount-input').value); if (!amt || !selectedCategory) return alert("정보 확인!"); if (currentTransaction.m === 'cash') state.cash += (currentTransaction.t === 'plus' ? amt : -amt); else state.card += (currentTransaction.t === 'plus' ? amt : -amt); const date = document.getElementById('date-picker').value; if (!state.dailyHistory[date]) state.dailyHistory[date] = []; state.dailyHistory[date].unshift({ type: currentTransaction.t, method: currentTransaction.m === 'cash' ? '현금' : '카드', category: selectedCategory, note: document.getElementById('modal-note-input').value || selectedCategory, amount: amt }); closeModal(); updateUI(); }
         function deleteItem(d, i) {
             // 삭제 전 다시 한 번 물어보기
@@ -930,20 +933,20 @@
             document.getElementById('search-results').innerHTML = res.map(h => {
                 const isCash = h.method === '현금';
                 return `
-                                                                                                        <div class="search-item ${isCash ? 'search-cash' : 'search-card'}">
-                                                                                                            <div>
-                                                                                                                <div style="display:flex; align-items:center; gap:6px;">
-                                                                                                                    <span class="method-tag ${isCash ? 'tag-cash' : 'tag-card'}">${h.method}</span>
-                                                                                                                    <small style="opacity:0.5;">${h.date}</small>
-                                                                                                                </div>
-                                                                                                                <span class="search-cat">${h.category}</span>
-                                                                                                                <div style="font-size:0.85rem; opacity:0.6;">${h.note}</div>
-                                                                                                            </div>
-                                                                                                            <div class="search-amt" style="color:${h.type === 'plus' ? '#2ecc71' : '#e74c3c'}">
-                                                                                                                ${h.type === 'plus' ? '+' : '-'}¥${h.amount.toLocaleString()}
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    `;
+                <div class="search-item ${isCash ? 'search-cash' : 'search-card'}">
+                 <div>
+                 <div style="display:flex; align-items:center; gap:6px;">
+                    <span class="method-tag ${isCash ? 'tag-cash' : 'tag-card'}">${h.method}</span>
+                    <small style="opacity:0.5;">${h.date}</small>
+                </div>
+                   <span class="search-cat">${h.category}</span>
+                   <div style="font-size:0.85rem; opacity:0.6;">${h.note}</div>
+                    </div>
+                        <div class="search-amt" style="color:${h.type === 'plus' ? '#2ecc71' : '#e74c3c'}">
+                            ${h.type === 'plus' ? '+' : '-'}¥${h.amount.toLocaleString()}
+                        </div>
+                    </div>
+                `;
             }).join('');
         }
         function save() { localStorage.setItem('finalLedger_V41', JSON.stringify(state)); }
