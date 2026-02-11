@@ -34,7 +34,7 @@ html, body {
   overflow: hidden; /* 🔥 전체 스크롤 차단 */
   background: var(--bg-color);
 }
-        .app-container { position: fixed; inset: 0; width: min(460px, 100vw);height: 100dvh; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
+        .app-container { position: fixed; inset: 0; width: 100%; height: 100dvh; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; overflow: hidden; }
         .tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
         .tab-content.active { display: flex; }
         .header { background: var(--header-bg); color: white; padding: 50px 20px 20px 20px; text-align: center; flex-shrink: 0; transition: background 0.3s; }
@@ -49,7 +49,7 @@ html, body {
         .button-grid button { padding: 22px 10px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1.0rem; }
         .btn-plus { background: var(--btn-plus-bg) !important; color: var(--btn-plus-text) !important; }
         .btn-minus { background: var(--btn-minus-bg) !important; color: var(--btn-minus-text) !important; }
-        .scroll-area { flex: 1; overflow-y: auto;  -webkit-overflow-scrolling: touch;  padding: 0 20px calc(70px + 20px); background: var(--bg-color); }
+        .scroll-area { flex: 1; overflow-y: auto;  -webkit-overflow-scrolling: touch;  padding: 0 20px calc(70px + env(safe-area-inset-bottom)); background: var(--bg-color); }
        
 
 /* --------------------------------------------------------------------------------- */
