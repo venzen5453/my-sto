@@ -17,9 +17,9 @@
             --primary-color: #4a90e2;
             --income-color: #2ecc71;
             --expense-color: #e74c3c;
-            --bg-color: #f8f9fa;
+            --bg-color: #fdfaf6;
             --card-bg: #ffffff;
-            --header-bg: #2c3e50;
+            --header-bg: #1e293b;
             --text-main: #2c3e50;
             --border-color: #e0e0e0;
             --cash-accent: #fcc419;
@@ -33,9 +33,9 @@
         }
 
         [data-theme='dark'] {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --header-bg: #000000;
+           --bg-color: #1a1c22;
+            --card-bg: #24262d;
+            --header-bg: #1f2937;
             --text-main: #f5f5f5;
             --border-color: #333333;
             --input-bg: #2d2d2d;
@@ -347,14 +347,17 @@
         }
 
 
-
-
-        /* 아이콘 크기 고정 (이전과 동일하게 유지) */
-        .nav-item span:first-child {
-            font-size: 1.4rem;
-            /* 아이콘 크기는 시원하게 유지 */
-            margin-bottom: 0px;
+        .nav-icon {
+            font-size: 1.5rem;   /* 아이콘 크기 */
+            line-height: 1;
         }
+
+        .nav-text {
+            font-size: 0.8rem;   /* 글씨 크기 */
+            margin-top: 3px;
+        }
+
+     
 
         .nav-item.active {
             color: var(--primary-color);
@@ -559,10 +562,25 @@
         </div>
 
         <nav class="nav-bar">
-            <button class="nav-item active" onclick="switchTab('home', this)">🏠<span>홈</span></button>
-            <button class="nav-item" onclick="switchTab('chart', this)">📊<span>통계</span></button>
-            <button class="nav-item" onclick="switchTab('search', this)">🔍<span>검색</span></button>
-            <button class="nav-item" onclick="switchTab('more', this)">⚙️<span>설정</span></button>
+            <button class="nav-item active" onclick="switchTab('home', this)">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">홈</span>
+            </button>
+
+            <button class="nav-item" onclick="switchTab('chart', this)">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">통계</span>
+            </button>
+
+            <button class="nav-item" onclick="switchTab('search', this)">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-text">검색</span>
+            </button>
+
+            <button class="nav-item" onclick="switchTab('more', this)">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">설정</span>
+            </button>
         </nav>
     </div>
 
