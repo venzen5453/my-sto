@@ -50,7 +50,7 @@ html, body {
         .button-grid button { padding: 22px 10px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1.0rem; }
         .btn-plus { background: var(--btn-plus-bg) !important; color: var(--btn-plus-text) !important; }
         .btn-minus { background: var(--btn-minus-bg) !important; color: var(--btn-minus-text) !important; }
-        .scroll-area { flex: 1; overflow-y: auto;  -webkit-overflow-scrolling: touch;  padding: 0 20px calc(70px + 20px); background: var(--bg-color); }
+        .scroll-area { flex: 1; overflow-y: auto;  -webkit-overflow-scrolling: touch;  padding: 0 20px calc(70px + env(safe-area-inset-bottom)); background: var(--bg-color); }
        
 
 /* --------------------------------------------------------------------------------- */
